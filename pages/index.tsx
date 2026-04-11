@@ -13,8 +13,10 @@ const COLOR_CLASSES: Record<string, string> = {
 
 function getWeekDates() {
   const today = new Date();
+  const day = today.getDay();
+  const showNextWeek = day === 6 || (day === 5 && today.getHours() >= 16);
   const sunday = new Date(today);
-  sunday.setDate(today.getDate() - today.getDay());
+  sunday.setDate(today.getDate() - day + (showNextWeek ? 7 : 0));
   return KEYS.map((_, i) => { const d = new Date(sunday); d.setDate(sunday.getDate() + i); return d; });
 }
 
