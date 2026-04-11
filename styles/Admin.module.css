@@ -42,7 +42,6 @@
 }
 .pinInput:focus { border-color: #A78BFA; }
 .pinInputError { border-color: #FF6B6B !important; }
-
 .errorMsg { color: #FF6B6B; font-size: 0.85rem; }
 
 .pinBtn {
@@ -61,7 +60,7 @@
 .pinBtn:hover { opacity: 0.9; transform: translateY(-1px); }
 .backLink { color: #888; text-decoration: none; font-size: 0.83rem; }
 
-/* ── Admin Page ─────────────────────────────────────────── */
+/* ── Admin page ─────────────────────────────────────────── */
 .adminPage { min-height: 100vh; background: #f7f3ff; font-family: 'Heebo', sans-serif; }
 
 .adminHeader {
@@ -71,14 +70,13 @@
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-  flex-wrap: wrap;
   gap: 0.6rem;
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
-.adminTitle { font-family: 'Secular One', sans-serif; font-size: 1.2rem; color: #2D2D2D; }
+.adminTitle { font-family: 'Secular One', sans-serif; font-size: 1.2rem; color: #2D2D2D; white-space: nowrap; }
 .headerActions { display: flex; align-items: center; gap: 0.6rem; }
 
 .saveBtn {
@@ -86,8 +84,8 @@
   color: white;
   border: none;
   border-radius: 10px;
-  padding: 0.55rem 1rem;
-  font-size: 0.9rem;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.92rem;
   font-family: 'Heebo', sans-serif;
   font-weight: 700;
   cursor: pointer;
@@ -97,17 +95,15 @@
 .saveBtn:hover { opacity: 0.85; transform: translateY(-1px); }
 .saveBtn:disabled { opacity: 0.7; cursor: default; transform: none; }
 .savedBtn { background: linear-gradient(135deg, #22c55e, #16a34a) !important; }
-
 .viewLink { color: #A78BFA; text-decoration: none; font-size: 0.88rem; font-weight: 600; white-space: nowrap; }
 
-/* ── Admin Main ─────────────────────────────────────────── */
 .adminMain {
-  max-width: 1100px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 1.25rem 0.9rem;
+  padding: 1.25rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.75rem;
 }
 
 .adminSectionTitle {
@@ -117,10 +113,10 @@
   color: #2D2D2D;
 }
 
-/* ── Calendar Grid ──────────────────────────────────────── */
-.adminGrid {
+/* ── Desktop grid (hidden on mobile) ────────────────────── */
+.desktopGrid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 0.6rem;
 }
 
@@ -132,20 +128,12 @@
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  border-top: 4px solid #A78BFA;
+  border-top: 4px solid #ccc;
 }
-
-.adminSun { border-top-color: #FF6B6B !important; }
-.adminMon { border-top-color: #FF8E53 !important; }
-.adminTue { border-top-color: #FFD93D !important; }
-.adminWed { border-top-color: #6BCB77 !important; }
-.adminThu { border-top-color: #4ECDC4 !important; }
-.adminFri { border-top-color: #45B7D1 !important; }
-.satCard  { background: #f0f0f0; opacity: 0.55; border-top-color: #ccc !important; }
 
 .adminDayName {
   font-family: 'Secular One', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   text-align: center;
   padding-bottom: 0.2rem;
   border-bottom: 1px solid rgba(0,0,0,0.06);
@@ -155,7 +143,7 @@
 
 .adminEventItem {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   background: rgba(167,139,250,0.1);
   border-radius: 6px;
@@ -170,20 +158,20 @@
   border: none;
   cursor: pointer;
   color: #FF6B6B;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   padding: 0 2px;
   flex-shrink: 0;
-  line-height: 1;
+  line-height: 1.4;
 }
 
-.addEventRow { display: flex; gap: 0.25rem; margin-top: 0.2rem; }
+.addEventRow { display: flex; gap: 0.3rem; margin-top: 0.15rem; }
 
 .addInput {
   flex: 1;
   border: 1px solid #e5e5e5;
   border-radius: 6px;
-  padding: 0.28rem 0.35rem;
-  font-size: 0.75rem;
+  padding: 0.28rem 0.4rem;
+  font-size: 0.78rem;
   font-family: 'Heebo', sans-serif;
   outline: none;
   min-width: 0;
@@ -195,8 +183,8 @@
   color: white;
   border: none;
   border-radius: 6px;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   font-size: 1rem;
   cursor: pointer;
   flex-shrink: 0;
@@ -206,22 +194,101 @@
 }
 .addBtn:hover { background: #9061f9; }
 
-/* ── Bottom row ─────────────────────────────────────────── */
-.bottomRow {
-  display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 1.25rem;
-  align-items: start;
+/* ── Mobile accordion (hidden on desktop) ───────────────── */
+.mobileAccordion { display: none; flex-direction: column; gap: 0.5rem; }
+
+.accordionItem {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  overflow: hidden;
+  border-right: 4px solid #ccc;
 }
 
-.notesSection { display: flex; flex-direction: column; }
+.accordionHeader {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-family: 'Heebo', sans-serif;
+  text-align: right;
+}
 
+.accordionDay {
+  font-family: 'Secular One', sans-serif;
+  font-size: 1.05rem;
+  color: #2D2D2D;
+}
+
+.accordionMeta { display: flex; align-items: center; gap: 0.5rem; }
+
+.eventCount {
+  background: rgba(167,139,250,0.15);
+  color: #7c3aed;
+  border-radius: 20px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.accordionArrow { font-size: 0.7rem; color: #aaa; }
+
+.accordionBody {
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.accordionEvent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(167,139,250,0.1);
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+  gap: 0.5rem;
+}
+
+.accordionAdd { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
+
+.accordionInput {
+  flex: 1;
+  border: 2px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.95rem;
+  font-family: 'Heebo', sans-serif;
+  outline: none;
+}
+.accordionInput:focus { border-color: #A78BFA; }
+
+.accordionAddBtn {
+  background: #A78BFA;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-family: 'Secular One', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.accordionAddBtn:hover { background: #9061f9; }
+
+/* ── Notes ──────────────────────────────────────────────── */
 .notesTextarea {
   width: 100%;
   border: 2px solid #e5e5e5;
   border-radius: 12px;
   padding: 0.9rem 1rem;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-family: 'Heebo', sans-serif;
   line-height: 1.7;
   resize: vertical;
@@ -232,42 +299,36 @@
 .notesTextarea:focus { border-color: #A78BFA; }
 
 /* ── Stars ──────────────────────────────────────────────── */
-.starsSection { display: flex; flex-direction: column; }
-
 .starsBox {
   background: white;
   border-radius: 12px;
-  padding: 0.75rem;
+  padding: 0.9rem 1rem;
   box-shadow: 0 3px 12px rgba(0,0,0,0.07);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
   border-top: 4px solid #FFD93D;
+}
+
+.starsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.1rem;
 }
 
 .starItem {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: rgba(255,215,0,0.15);
-  border-radius: 8px;
-  padding: 0.3rem 0.45rem;
-  font-size: 0.83rem;
+  gap: 0.3rem;
+  background: rgba(255,215,0,0.18);
+  border-radius: 20px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.88rem;
   font-weight: 600;
 }
 
-/* ── Mobile ─────────────────────────────────────────────── */
-@media (max-width: 860px) {
-  .adminGrid { grid-template-columns: repeat(4, 1fr); }
-  .bottomRow { grid-template-columns: 1fr; }
-  .satCard { display: none; }
-}
-
-@media (max-width: 500px) {
-  .adminGrid { grid-template-columns: repeat(3, 1fr); }
-  .adminHeader { padding: 0.75rem 0.9rem; }
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .desktopGrid { display: none; }
+  .mobileAccordion { display: flex; }
+  .adminMain { padding: 1rem 0.75rem; }
   .adminTitle { font-size: 1rem; }
-  .adminMain { padding: 1rem 0.6rem; }
-  .saveBtn { padding: 0.5rem 0.75rem; font-size: 0.82rem; }
-  .viewLink { font-size: 0.8rem; }
 }

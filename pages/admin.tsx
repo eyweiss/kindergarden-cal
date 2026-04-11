@@ -3,12 +3,9 @@ import Head from "next/head";
 import Link from "next/link";
 import styles from "../styles/Admin.module.css";
 
-const DAYS = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
-const KEYS = ["sun","mon","tue","wed","thu","fri","sat"];
-const ADMIN_COLOR: Record<string, string> = {
-  sun: styles.adminSun, mon: styles.adminMon, tue: styles.adminTue,
-  wed: styles.adminWed, thu: styles.adminThu, fri: styles.adminFri,
-};
+const DAYS = ["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
+const KEYS = ["sun","mon","tue","wed","thu","fri"];
+const COLORS = ["#FF6B6B","#FF8E53","#FFD93D","#6BCB77","#4ECDC4","#45B7D1"];
 
 export default function Admin() {
   const [pin, setPin]           = useState("");
@@ -21,6 +18,7 @@ export default function Admin() {
   const [saved, setSaved]       = useState(false);
   const [newEvent, setNewEvent] = useState<Record<string, string>>({});
   const [newStar, setNewStar]   = useState("");
+  const [openDay, setOpenDay]   = useState<string | null>(null);
 
   useEffect(() => {
     if (!authed) return;
@@ -104,31 +102,34 @@ export default function Admin() {
         <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet" />
       </Head>
       <div className={styles.adminPage} dir="rtl">
+
+        {/* Sticky header */}
         <header className={styles.adminHeader}>
-          <h1 className={styles.adminTitle}>✏️ עריכת לוח גן לבנון</h1>
+          <h1 className={styles.adminTitle}>✏️ לוח גן לבנון</h1>
           <div className={styles.headerActions}>
             <button
               className={`${styles.saveBtn} ${saved ? styles.savedBtn : ""}`}
               onClick={handleSave} disabled={saving}
             >
-              {saving ? "שומר..." : saved ? "✓ נשמר!" : "💾 שמור שינויים"}
+              {saving ? "שומר..." : saved ? "✓ נשמר!" : "💾 שמור"}
             </button>
-            <Link href="/" className={styles.viewLink}>👀 לוח הורים</Link>
+            <Link href="/" className={styles.viewLink}>👀 הורים</Link>
           </div>
         </header>
 
         <main className={styles.adminMain}>
-          {/* Calendar */}
+
+          {/* ── Calendar: accordion on mobile, grid on desktop ── */}
           <section>
             <h2 className={styles.adminSectionTitle}>📅 אירועי השבוע</h2>
-            <div className={styles.adminGrid}>
+
+            {/* Desktop grid */}
+            <div className={styles.desktopGrid}>
               {DAYS.map((dayName, i) => {
                 const key = KEYS[i];
-                const isSat = i === 6;
                 const events = calendar[key] || [];
-                const cardClass = [styles.adminDayCard, isSat ? styles.satCard : ADMIN_COLOR[key]].filter(Boolean).join(" ");
                 return (
-                  <div key={key} className={cardClass}>
+                  <div key={key} className={styles.adminDayCard} style={{ borderTopColor: COLORS[i] }}>
                     <div className={styles.adminDayName}>{dayName}</div>
                     <div className={styles.adminEventList}>
                       {events.map((ev, j) => (
@@ -138,16 +139,59 @@ export default function Admin() {
                         </div>
                       ))}
                     </div>
-                    {!isSat && (
-                      <div className={styles.addEventRow}>
-                        <input
-                          type="text" className={styles.addInput}
-                          placeholder="הוסיפי אירוע..."
-                          value={newEvent[key] || ""}
-                          onChange={e => setNewEvent(p => ({ ...p, [key]: e.target.value }))}
-                          onKeyDown={e => e.key === "Enter" && addEvent(key)}
-                        />
-                        <button className={styles.addBtn} onClick={() => addEvent(key)}>+</button>
+                    <div className={styles.addEventRow}>
+                      <input
+                        type="text" className={styles.addInput}
+                        placeholder="הוסיפי אירוע..."
+                        value={newEvent[key] || ""}
+                        onChange={e => setNewEvent(p => ({ ...p, [key]: e.target.value }))}
+                        onKeyDown={e => e.key === "Enter" && addEvent(key)}
+                      />
+                      <button className={styles.addBtn} onClick={() => addEvent(key)}>+</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Mobile accordion */}
+            <div className={styles.mobileAccordion}>
+              {DAYS.map((dayName, i) => {
+                const key = KEYS[i];
+                const events = calendar[key] || [];
+                const isOpen = openDay === key;
+                return (
+                  <div key={key} className={styles.accordionItem} style={{ borderRightColor: COLORS[i] }}>
+                    <button
+                      className={styles.accordionHeader}
+                      onClick={() => setOpenDay(isOpen ? null : key)}
+                    >
+                      <span className={styles.accordionDay}>{dayName}</span>
+                      <span className={styles.accordionMeta}>
+                        {events.length > 0 && <span className={styles.eventCount}>{events.length} אירועים</span>}
+                        <span className={styles.accordionArrow}>{isOpen ? "▲" : "▼"}</span>
+                      </span>
+                    </button>
+                    {isOpen && (
+                      <div className={styles.accordionBody}>
+                        {events.map((ev, j) => (
+                          <div key={j} className={styles.accordionEvent}>
+                            <span>{ev}</span>
+                            <button className={styles.removeBtn} onClick={() => removeEvent(key, j)}>✕</button>
+                          </div>
+                        ))}
+                        <div className={styles.accordionAdd}>
+                          <input
+                            type="text"
+                            className={styles.accordionInput}
+                            placeholder="הוסיפי אירוע..."
+                            value={newEvent[key] || ""}
+                            onChange={e => setNewEvent(p => ({ ...p, [key]: e.target.value }))}
+                            onKeyDown={e => e.key === "Enter" && addEvent(key)}
+                            autoFocus
+                          />
+                          <button className={styles.accordionAddBtn} onClick={() => addEvent(key)}>הוסיפי</button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -156,42 +200,43 @@ export default function Admin() {
             </div>
           </section>
 
-          <div className={styles.bottomRow}>
-            {/* Notes */}
-            <section className={styles.notesSection}>
-              <h2 className={styles.adminSectionTitle}>📝 הודעות והערות</h2>
-              <textarea
-                className={styles.notesTextarea}
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
-                placeholder="כתבי הודעות, תזכורות, דברים חשובים להורים..."
-                rows={6}
-              />
-            </section>
+          {/* ── Notes ── */}
+          <section>
+            <h2 className={styles.adminSectionTitle}>📝 הודעות והערות</h2>
+            <textarea
+              className={styles.notesTextarea}
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="כתבי הודעות, תזכורות, דברים חשובים להורים..."
+              rows={5}
+            />
+          </section>
 
-            {/* Stars */}
-            <section className={styles.starsSection}>
-              <h2 className={styles.adminSectionTitle}>⭐ כוכבי השבוע</h2>
-              <div className={styles.starsBox}>
+          {/* ── Stars ── */}
+          <section>
+            <h2 className={styles.adminSectionTitle}>⭐ כוכבי השבוע</h2>
+            <div className={styles.starsBox}>
+              <div className={styles.starsGrid}>
                 {stars.map((star, i) => (
                   <div key={i} className={styles.starItem}>
                     <span>⭐ {star}</span>
                     <button className={styles.removeBtn} onClick={() => removeStar(i)}>✕</button>
                   </div>
                 ))}
-                <div className={styles.addEventRow}>
-                  <input
-                    type="text" className={styles.addInput}
-                    placeholder="שם הילד/ה..."
-                    value={newStar}
-                    onChange={e => setNewStar(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && addStar()}
-                  />
-                  <button className={styles.addBtn} onClick={addStar}>+</button>
-                </div>
               </div>
-            </section>
-          </div>
+              <div className={styles.addEventRow} style={{ marginTop: stars.length ? "0.5rem" : 0 }}>
+                <input
+                  type="text" className={styles.addInput}
+                  placeholder="שם הילד/ה..."
+                  value={newStar}
+                  onChange={e => setNewStar(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && addStar()}
+                />
+                <button className={styles.addBtn} onClick={addStar}>+</button>
+              </div>
+            </div>
+          </section>
+
         </main>
       </div>
     </>
