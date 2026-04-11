@@ -28,6 +28,7 @@ export default function Home() {
 
   const weekLabel = `${dates[0].getDate()}/${dates[0].getMonth()+1} – ${dates[5].getDate()}/${dates[5].getMonth()+1}/${dates[5].getFullYear()}`;
   const stars: string[] = data?.stars || [];
+  const notes: any[] = data?.notes || [];
 
   return (
     <>
@@ -45,8 +46,9 @@ export default function Home() {
 
         <main className={styles.main}>
           <div className={styles.layout}>
-            {/* Left column: calendar + notes */}
             <div className={styles.leftCol}>
+
+              {/* Calendar */}
               <section>
                 <h2 className={styles.sectionTitle}>📅 לוח שבועי</h2>
                 <div className={styles.calendarGrid}>
@@ -76,18 +78,25 @@ export default function Home() {
                 </div>
               </section>
 
+              {/* Notes feed */}
               <section className={styles.notesSection}>
                 <h2 className={styles.sectionTitle}>📝 הודעות והערות</h2>
-                <div className={styles.notesBox}>
-                  {!data?.notes
-                    ? <p className={styles.empty}>אין הערות השבוע</p>
-                    : <p className={styles.notesText}>{data.notes}</p>
+                <div className={styles.notesFeed}>
+                  {notes.length === 0
+                    ? <p className={styles.emptyNotes}>אין הודעות השבוע</p>
+                    : notes.map((note: any) => (
+                        <div key={note.id} className={styles.noteCard}>
+                          <p className={styles.noteText}>{note.text}</p>
+                          <span className={styles.noteDate}>{note.date}</span>
+                        </div>
+                      ))
                   }
                 </div>
               </section>
+
             </div>
 
-            {/* Right column: stars */}
+            {/* Stars */}
             <div className={styles.rightCol}>
               <section className={styles.starsSection}>
                 <h2 className={styles.starsSectionTitle}>⭐ כוכבי השבוע</h2>

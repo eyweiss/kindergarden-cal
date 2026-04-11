@@ -8,12 +8,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === "GET") {
     try {
       const { blobs } = await list({ prefix: FILENAME, token: TOKEN });
-      if (!blobs.length) return res.status(200).json({ calendar: {}, notes: "", stars: [] });
+      if (!blobs.length) return res.status(200).json({ calendar: {}, notes: [], stars: [] });
       const response = await fetch(blobs[0].url + "?t=" + Date.now());
       const data = await response.json();
+      // migrate old string notes to array
+      if (typeof data.notes === "string") {
+        data.notes = data.notes ? [{ id: Date.now(), text: data.notes, date: new Date().toLocaleDateString("he-IL") }] : [];
+      }
       return res.status(200).json(data);
     } catch (e: any) {
-      return res.status(200).json({ calendar: {}, notes: "", stars: [], error: e.message });
+      return res.status(200).json({ calendar: {}, notes: [], stars: [], error: e.message });
     }
   }
 

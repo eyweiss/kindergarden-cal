@@ -7,12 +7,15 @@ const DAYS = ["ראשון","שני","שלישי","רביעי","חמישי","שי
 const KEYS = ["sun","mon","tue","wed","thu","fri"];
 const COLORS = ["#FF6B6B","#FF8E53","#FFD93D","#6BCB77","#4ECDC4","#45B7D1"];
 
+interface Note { id: number; text: string; date: string; }
+
 export default function Admin() {
   const [pin, setPin]           = useState("");
   const [authed, setAuthed]     = useState(false);
   const [pinError, setPinError] = useState(false);
   const [calendar, setCalendar] = useState<Record<string, string[]>>({});
-  const [notes, setNotes]       = useState("");
+  const [notes, setNotes]       = useState<Note[]>([]);
+  const [newNote, setNewNote]   = useState("");
   const [stars, setStars]       = useState<string[]>([]);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
@@ -24,7 +27,7 @@ export default function Admin() {
     if (!authed) return;
     fetch("/api/data").then(r => r.json()).then(d => {
       setCalendar(d.calendar || {});
-      setNotes(d.notes || "");
+      setNotes(d.notes || []);
       setStars(d.stars || []);
     });
   }, [authed]);
@@ -45,6 +48,16 @@ export default function Admin() {
   const removeEvent = (key: string, idx: number) =>
     setCalendar(p => ({ ...p, [key]: p[key].filter((_, i) => i !== idx) }));
 
+  const addNote = () => {
+    const text = newNote.trim();
+    if (!text) return;
+    const date = new Date().toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "numeric" });
+    setNotes(p => [{ id: Date.now(), text, date }, ...p]);
+    setNewNote("");
+  };
+
+  const removeNote = (id: number) => setNotes(p => p.filter(n => n.id !== id));
+
   const addStar = () => {
     const val = newStar.trim();
     if (!val) return;
@@ -52,8 +65,7 @@ export default function Admin() {
     setNewStar("");
   };
 
-  const removeStar = (idx: number) =>
-    setStars(p => p.filter((_, i) => i !== idx));
+  const removeStar = (idx: number) => setStars(p => p.filter((_, i) => i !== idx));
 
   const handleSave = async () => {
     setSaving(true);
@@ -103,7 +115,6 @@ export default function Admin() {
       </Head>
       <div className={styles.adminPage} dir="rtl">
 
-        {/* Sticky header */}
         <header className={styles.adminHeader}>
           <h1 className={styles.adminTitle}>✏️ לוח גן לבנון</h1>
           <div className={styles.headerActions}>
@@ -119,11 +130,9 @@ export default function Admin() {
 
         <main className={styles.adminMain}>
 
-          {/* ── Calendar: accordion on mobile, grid on desktop ── */}
+          {/* Calendar */}
           <section>
             <h2 className={styles.adminSectionTitle}>📅 אירועי השבוע</h2>
-
-            {/* Desktop grid */}
             <div className={styles.desktopGrid}>
               {DAYS.map((dayName, i) => {
                 const key = KEYS[i];
@@ -140,8 +149,7 @@ export default function Admin() {
                       ))}
                     </div>
                     <div className={styles.addEventRow}>
-                      <input
-                        type="text" className={styles.addInput}
+                      <input type="text" className={styles.addInput}
                         placeholder="הוסיפי אירוע..."
                         value={newEvent[key] || ""}
                         onChange={e => setNewEvent(p => ({ ...p, [key]: e.target.value }))}
@@ -154,7 +162,6 @@ export default function Admin() {
               })}
             </div>
 
-            {/* Mobile accordion */}
             <div className={styles.mobileAccordion}>
               {DAYS.map((dayName, i) => {
                 const key = KEYS[i];
@@ -162,10 +169,7 @@ export default function Admin() {
                 const isOpen = openDay === key;
                 return (
                   <div key={key} className={styles.accordionItem} style={{ borderRightColor: COLORS[i] }}>
-                    <button
-                      className={styles.accordionHeader}
-                      onClick={() => setOpenDay(isOpen ? null : key)}
-                    >
+                    <button className={styles.accordionHeader} onClick={() => setOpenDay(isOpen ? null : key)}>
                       <span className={styles.accordionDay}>{dayName}</span>
                       <span className={styles.accordionMeta}>
                         {events.length > 0 && <span className={styles.eventCount}>{events.length} אירועים</span>}
@@ -181,9 +185,7 @@ export default function Admin() {
                           </div>
                         ))}
                         <div className={styles.accordionAdd}>
-                          <input
-                            type="text"
-                            className={styles.accordionInput}
+                          <input type="text" className={styles.accordionInput}
                             placeholder="הוסיפי אירוע..."
                             value={newEvent[key] || ""}
                             onChange={e => setNewEvent(p => ({ ...p, [key]: e.target.value }))}
@@ -200,19 +202,43 @@ export default function Admin() {
             </div>
           </section>
 
-          {/* ── Notes ── */}
+          {/* Notes */}
           <section>
             <h2 className={styles.adminSectionTitle}>📝 הודעות והערות</h2>
-            <textarea
-              className={styles.notesTextarea}
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="כתבי הודעות, תזכורות, דברים חשובים להורים..."
-              rows={5}
-            />
+            <div className={styles.notesPanel}>
+              {/* Add new note */}
+              <div className={styles.addNoteBox}>
+                <textarea
+                  className={styles.addNoteInput}
+                  value={newNote}
+                  onChange={e => setNewNote(e.target.value)}
+                  placeholder="כתבי הודעה חדשה..."
+                  rows={3}
+                  onKeyDown={e => { if (e.key === "Enter" && e.ctrlKey) addNote(); }}
+                />
+                <button className={styles.addNoteBtn} onClick={addNote}>
+                  ＋ הוסיפי הודעה
+                </button>
+              </div>
+
+              {/* Existing notes */}
+              {notes.length > 0 && (
+                <div className={styles.notesList}>
+                  {notes.map((note) => (
+                    <div key={note.id} className={styles.adminNoteCard}>
+                      <div className={styles.adminNoteTop}>
+                        <span className={styles.adminNoteDate}>{note.date}</span>
+                        <button className={styles.removeBtn} onClick={() => removeNote(note.id)}>✕ מחקי</button>
+                      </div>
+                      <p className={styles.adminNoteText}>{note.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </section>
 
-          {/* ── Stars ── */}
+          {/* Stars */}
           <section>
             <h2 className={styles.adminSectionTitle}>⭐ כוכבי השבוע</h2>
             <div className={styles.starsBox}>
@@ -225,8 +251,7 @@ export default function Admin() {
                 ))}
               </div>
               <div className={styles.addEventRow} style={{ marginTop: stars.length ? "0.5rem" : 0 }}>
-                <input
-                  type="text" className={styles.addInput}
+                <input type="text" className={styles.addInput}
                   placeholder="שם הילד/ה..."
                   value={newStar}
                   onChange={e => setNewStar(e.target.value)}

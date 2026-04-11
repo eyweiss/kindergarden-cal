@@ -204,3 +204,44 @@
   .sectionTitle { font-size: 1.1rem; }
   .notesBox { padding: 1rem; }
 }
+
+/* ── Notes feed (parents) ───────────────────────────────── */
+.notesFeed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.noteCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+  padding: 1rem 1.25rem;
+  border-right: 5px solid #A78BFA;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.noteText {
+  font-size: 0.97rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: #2D2D2D;
+}
+
+.noteDate {
+  font-size: 0.75rem;
+  color: #aaa;
+  align-self: flex-end;
+}
+
+.emptyNotes {
+  color: #aaa;
+  font-size: 0.9rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+}

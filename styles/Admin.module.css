@@ -332,3 +332,76 @@
   .adminMain { padding: 1rem 0.75rem; }
   .adminTitle { font-size: 1rem; }
 }
+
+/* ── Notes panel (admin) ────────────────────────────────── */
+.notesPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.addNoteBox {
+  background: white;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+  border-top: 4px solid #A78BFA;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.addNoteInput {
+  width: 100%;
+  border: 2px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 0.97rem;
+  font-family: 'Heebo', sans-serif;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.addNoteInput:focus { border-color: #A78BFA; }
+
+.addNoteBtn {
+  align-self: flex-start;
+  background: linear-gradient(135deg, #A78BFA, #45B7D1);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-family: 'Secular One', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.addNoteBtn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+.notesList { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.adminNoteCard {
+  background: white;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-right: 4px solid #A78BFA;
+  opacity: 0.85;
+}
+
+.adminNoteTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.adminNoteDate { font-size: 0.75rem; color: #aaa; }
+
+.adminNoteText {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  color: #555;
+}
