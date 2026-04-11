@@ -1,56 +1,67 @@
 .page { min-height: 100vh; display: flex; flex-direction: column; }
 
+/* ── Header ─────────────────────────────────────────────── */
 .header {
   background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 40%, #6BCB77 70%, #45B7D1 100%);
-  padding: 2.5rem 1.5rem 3rem;
+  padding: 1.75rem 1rem 2rem;
   text-align: center;
   position: relative;
   overflow: hidden;
 }
 
-.headerEmojis { font-size: 2rem; margin-bottom: 0.5rem; letter-spacing: 0.5rem; }
+.headerEmojis { font-size: 1.6rem; margin-bottom: 0.4rem; letter-spacing: 0.4rem; }
 
 .title {
   font-family: 'Secular One', sans-serif;
-  font-size: clamp(2.2rem, 6vw, 3.5rem);
+  font-size: clamp(1.4rem, 5vw, 3rem);
   color: white;
   text-shadow: 0 3px 12px rgba(0,0,0,0.2);
+  line-height: 1.2;
 }
 
-.subtitle { font-size: 1rem; color: rgba(255,255,255,0.9); margin-top: 0.4rem; font-weight: 500; }
+.subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.9); margin-top: 0.4rem; font-weight: 500; }
 
+/* ── Main ───────────────────────────────────────────────── */
 .main {
   flex: 1;
   max-width: 1100px;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem 1.25rem;
+  padding: 1.25rem 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 1.5rem;
 }
 
 .sectionTitle {
   font-family: 'Secular One', sans-serif;
-  font-size: 1.4rem;
-  margin-bottom: 1.1rem;
-  color: var(--dark);
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+  color: #2D2D2D;
 }
 
+/* ── Layout ─────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 210px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.leftCol { display: flex; flex-direction: column; gap: 1.5rem; }
+.rightCol { position: sticky; top: 1rem; }
+
+/* ── Calendar grid ──────────────────────────────────────── */
 .calendarGrid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.75rem;
-}
-
-@media (max-width: 700px) {
-  .calendarGrid { grid-template-columns: repeat(2, 1fr); }
+  gap: 0.5rem;
 }
 
 .dayCard {
   background: white;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.07);
   overflow: hidden;
   transition: transform 0.18s ease;
   border-top: 4px solid #ddd;
@@ -63,125 +74,133 @@
 .thu  { border-top-color: #4ECDC4 !important; }
 .fri  { border-top-color: #45B7D1 !important; }
 
-.dayCard:hover { transform: translateY(-3px); }
-.satCard { background: #f0f0f0 !important; border-top-color: #ccc !important; opacity: 0.55; transform: none !important; }
+.dayCard:hover { transform: translateY(-2px); }
+.satCard { background: #f0f0f0 !important; border-top-color: #ccc !important; opacity: 0.5; transform: none !important; }
 
 .dayHeader {
-  padding: 0.6rem 0.75rem 0.4rem;
+  padding: 0.5rem 0.4rem 0.3rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
-.dayName { font-family: 'Secular One', sans-serif; font-size: 0.95rem; }
-.dayDate { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+.dayName { font-family: 'Secular One', sans-serif; font-size: 0.82rem; }
+.dayDate { font-size: 0.65rem; color: #888; margin-top: 1px; }
 
 .dayBody {
-  padding: 0.65rem 0.75rem;
-  min-height: 80px;
+  padding: 0.5rem 0.4rem;
+  min-height: 60px;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.3rem;
 }
 
 .event {
   background: linear-gradient(135deg, rgba(255,107,107,0.12), rgba(69,183,209,0.12));
-  border-radius: 8px;
-  padding: 0.3rem 0.5rem;
-  font-size: 0.82rem;
+  border-radius: 6px;
+  padding: 0.25rem 0.35rem;
+  font-size: 0.75rem;
   line-height: 1.3;
   font-weight: 500;
 }
 
-.empty { color: var(--muted); font-size: 0.85rem; text-align: center; margin: auto; }
+.holiday {
+  background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,165,0,0.2));
+  border-radius: 6px;
+  padding: 0.25rem 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #b45309;
+  border: 1px solid rgba(255,165,0,0.3);
+  line-height: 1.3;
+}
 
+.empty { color: #aaa; font-size: 0.75rem; text-align: center; margin: auto; }
+
+/* ── Notes ──────────────────────────────────────────────── */
 .notesSection { width: 100%; }
 
 .notesBox {
   background: white;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+  padding: 1.25rem;
   border-right: 5px solid #A78BFA;
-  min-height: 100px;
+  min-height: 80px;
 }
 
-.notesText { font-size: 1rem; line-height: 1.8; white-space: pre-wrap; }
+.notesText { font-size: 0.95rem; line-height: 1.8; white-space: pre-wrap; }
 
-.footer { text-align: center; padding: 1.5rem; border-top: 1px solid rgba(0,0,0,0.07); }
-
-.adminLink { color: var(--muted); text-decoration: none; font-size: 0.85rem; opacity: 0.7; }
-.adminLink:hover { opacity: 1; }
-
-/* ── Layout ─────────────────────────────────────────────── */
-.layout {
-  display: grid;
-  grid-template-columns: 1fr 220px;
-  gap: 1.5rem;
-  align-items: start;
-}
-
-@media (max-width: 800px) {
-  .layout { grid-template-columns: 1fr; }
-  .rightCol { order: -1; }
-}
-
-.leftCol { display: flex; flex-direction: column; gap: 2rem; }
-.rightCol { position: sticky; top: 1rem; }
-
-/* ── Holiday badge ──────────────────────────────────────── */
-.holiday {
-  background: linear-gradient(135deg, rgba(255,215,0,0.25), rgba(255,165,0,0.2));
-  border-radius: 7px;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #b45309;
-  border: 1px solid rgba(255,165,0,0.3);
-}
-
-/* ── Stars section ──────────────────────────────────────── */
+/* ── Stars ──────────────────────────────────────────────── */
 .starsSection {
   background: white;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 1.25rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+  padding: 1rem 0.9rem;
   border-top: 4px solid #FFD93D;
 }
 
 .starsSectionTitle {
   font-family: 'Secular One', sans-serif;
-  font-size: 1.15rem;
-  margin-bottom: 1rem;
-  color: var(--dark);
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+  color: #2D2D2D;
 }
 
-.starsBox {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+.starsBox { display: flex; flex-direction: column; gap: 0.4rem; }
 
 .starItem {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.1));
-  border-radius: 10px;
-  padding: 0.5rem 0.75rem;
-  animation: popIn 0.3s ease;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, rgba(255,215,0,0.18), rgba(255,165,0,0.1));
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  animation: popIn 0.25s ease;
 }
 
-.starEmoji { font-size: 1.1rem; }
+.starEmoji { font-size: 1rem; }
+.starName { font-size: 0.9rem; font-weight: 700; color: #2D2D2D; }
 
-.starName {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--dark);
-}
+/* ── Footer ─────────────────────────────────────────────── */
+.footer { text-align: center; padding: 1.25rem; border-top: 1px solid rgba(0,0,0,0.07); }
+.adminLink { color: #888; text-decoration: none; font-size: 0.8rem; opacity: 0.6; }
+.adminLink:hover { opacity: 1; }
 
 @keyframes popIn {
-  from { transform: scale(0.8); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+/* ── Mobile ─────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+  .rightCol { position: static; order: -1; }
+
+  /* Stars horizontal on mobile */
+  .starsBox { flex-direction: row; flex-wrap: wrap; gap: 0.4rem; }
+  .starsSection { padding: 0.9rem; }
+}
+
+@media (max-width: 600px) {
+  .main { padding: 1rem 0.6rem; }
+  .header { padding: 1.25rem 0.75rem 1.5rem; }
+  .headerEmojis { font-size: 1.3rem; letter-spacing: 0.3rem; }
+
+  /* Calendar: 3 cols (Sun–Fri) + Sat hidden or small */
+  .calendarGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+  .satCard { display: none; }
+
+  .dayName { font-size: 0.78rem; }
+  .dayDate { font-size: 0.6rem; }
+  .dayBody { min-height: 50px; padding: 0.4rem 0.35rem; }
+  .event { font-size: 0.7rem; }
+  .holiday { font-size: 0.65rem; }
+
+  .sectionTitle { font-size: 1.1rem; }
+  .notesBox { padding: 1rem; }
 }
