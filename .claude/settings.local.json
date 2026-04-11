@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C D:/Pyscripts/kindergarden-cal remote -v)",
+      "Bash(gh auth:*)",
+      "Bash(vercel whoami:*)",
+      "Bash(npx vercel:*)",
+      "Bash(gh --version)",
+      "Bash(npm list:*)",
+      "Bash(export PATH=\"/c/Users/Weiss/AppData/Roaming/npm:$PATH\")",
+      "Bash(vercel --version)",
+      "Bash(gh repo:*)",
+      "Bash(vercel --yes)",
+      "Bash(vercel link:*)",
+      "Bash(vercel --yes --scope eyweiss-projects)",
+      "Bash(vercel logs:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(npx next:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}
