@@ -247,3 +247,42 @@
   background: white;
 }
 .notesTextarea:focus { border-color: #A78BFA; }
+
+/* ── Bottom row (notes + stars side by side) ────────────── */
+.bottomRow {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .bottomRow { grid-template-columns: 1fr; }
+}
+
+.notesSection { display: flex; flex-direction: column; }
+
+/* ── Stars section ──────────────────────────────────────── */
+.starsSection { display: flex; flex-direction: column; }
+
+.starsBox {
+  background: white;
+  border-radius: 14px;
+  padding: 0.75rem;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-top: 4px solid #FFD93D;
+}
+
+.starItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,215,0,0.15);
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}

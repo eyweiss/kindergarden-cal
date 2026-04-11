@@ -16,15 +16,18 @@ export default function Admin() {
   const [pinError, setPinError] = useState(false);
   const [calendar, setCalendar] = useState<Record<string, string[]>>({});
   const [notes, setNotes]       = useState("");
+  const [stars, setStars]       = useState<string[]>([]);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
   const [newEvent, setNewEvent] = useState<Record<string, string>>({});
+  const [newStar, setNewStar]   = useState("");
 
   useEffect(() => {
     if (!authed) return;
     fetch("/api/data").then(r => r.json()).then(d => {
       setCalendar(d.calendar || {});
       setNotes(d.notes || "");
+      setStars(d.stars || []);
     });
   }, [authed]);
 
@@ -41,16 +44,25 @@ export default function Admin() {
     setNewEvent(p => ({ ...p, [key]: "" }));
   };
 
-  const removeEvent = (key: string, idx: number) => {
+  const removeEvent = (key: string, idx: number) =>
     setCalendar(p => ({ ...p, [key]: p[key].filter((_, i) => i !== idx) }));
+
+  const addStar = () => {
+    const val = newStar.trim();
+    if (!val) return;
+    setStars(p => [...p, val]);
+    setNewStar("");
   };
+
+  const removeStar = (idx: number) =>
+    setStars(p => p.filter((_, i) => i !== idx));
 
   const handleSave = async () => {
     setSaving(true);
     await fetch("/api/data", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ calendar, notes }),
+      body: JSON.stringify({ calendar, notes, stars }),
     });
     setSaving(false); setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -93,7 +105,7 @@ export default function Admin() {
       </Head>
       <div className={styles.adminPage} dir="rtl">
         <header className={styles.adminHeader}>
-          <h1 className={styles.adminTitle}>✏️ עריכת לוח השבוע</h1>
+          <h1 className={styles.adminTitle}>✏️ עריכת לוח גן לבנון</h1>
           <div className={styles.headerActions}>
             <button
               className={`${styles.saveBtn} ${saved ? styles.savedBtn : ""}`}
@@ -106,6 +118,7 @@ export default function Admin() {
         </header>
 
         <main className={styles.adminMain}>
+          {/* Calendar */}
           <section>
             <h2 className={styles.adminSectionTitle}>📅 אירועי השבוע</h2>
             <div className={styles.adminGrid}>
@@ -128,8 +141,7 @@ export default function Admin() {
                     {!isSat && (
                       <div className={styles.addEventRow}>
                         <input
-                          type="text"
-                          className={styles.addInput}
+                          type="text" className={styles.addInput}
                           placeholder="הוסיפי אירוע..."
                           value={newEvent[key] || ""}
                           onChange={e => setNewEvent(p => ({ ...p, [key]: e.target.value }))}
@@ -144,16 +156,42 @@ export default function Admin() {
             </div>
           </section>
 
-          <section>
-            <h2 className={styles.adminSectionTitle}>📝 הודעות והערות</h2>
-            <textarea
-              className={styles.notesTextarea}
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="כתבי הודעות, תזכורות, דברים חשובים להורים..."
-              rows={6}
-            />
-          </section>
+          <div className={styles.bottomRow}>
+            {/* Notes */}
+            <section className={styles.notesSection}>
+              <h2 className={styles.adminSectionTitle}>📝 הודעות והערות</h2>
+              <textarea
+                className={styles.notesTextarea}
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder="כתבי הודעות, תזכורות, דברים חשובים להורים..."
+                rows={6}
+              />
+            </section>
+
+            {/* Stars */}
+            <section className={styles.starsSection}>
+              <h2 className={styles.adminSectionTitle}>⭐ כוכבי השבוע</h2>
+              <div className={styles.starsBox}>
+                {stars.map((star, i) => (
+                  <div key={i} className={styles.starItem}>
+                    <span>⭐ {star}</span>
+                    <button className={styles.removeBtn} onClick={() => removeStar(i)}>✕</button>
+                  </div>
+                ))}
+                <div className={styles.addEventRow}>
+                  <input
+                    type="text" className={styles.addInput}
+                    placeholder="שם הילד/ה..."
+                    value={newStar}
+                    onChange={e => setNewStar(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && addStar()}
+                  />
+                  <button className={styles.addBtn} onClick={addStar}>+</button>
+                </div>
+              </div>
+            </section>
+          </div>
         </main>
       </div>
     </>
