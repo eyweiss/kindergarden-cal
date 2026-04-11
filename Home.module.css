@@ -1,0 +1,115 @@
+.page { min-height: 100vh; display: flex; flex-direction: column; }
+
+.header {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 40%, #6BCB77 70%, #45B7D1 100%);
+  padding: 2.5rem 1.5rem 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.headerEmojis { font-size: 2rem; margin-bottom: 0.5rem; letter-spacing: 0.5rem; }
+
+.title {
+  font-family: 'Secular One', sans-serif;
+  font-size: clamp(2.2rem, 6vw, 3.5rem);
+  color: white;
+  text-shadow: 0 3px 12px rgba(0,0,0,0.2);
+}
+
+.subtitle { font-size: 1rem; color: rgba(255,255,255,0.9); margin-top: 0.4rem; font-weight: 500; }
+
+.main {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.sectionTitle {
+  font-family: 'Secular One', sans-serif;
+  font-size: 1.4rem;
+  margin-bottom: 1.1rem;
+  color: var(--dark);
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 700px) {
+  .calendarGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.dayCard {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform 0.18s ease;
+  border-top: 4px solid #ddd;
+}
+
+.sun  { border-top-color: #FF6B6B !important; }
+.mon  { border-top-color: #FF8E53 !important; }
+.tue  { border-top-color: #FFD93D !important; }
+.wed  { border-top-color: #6BCB77 !important; }
+.thu  { border-top-color: #4ECDC4 !important; }
+.fri  { border-top-color: #45B7D1 !important; }
+
+.dayCard:hover { transform: translateY(-3px); }
+.satCard { background: #f0f0f0 !important; border-top-color: #ccc !important; opacity: 0.55; transform: none !important; }
+
+.dayHeader {
+  padding: 0.6rem 0.75rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.dayName { font-family: 'Secular One', sans-serif; font-size: 0.95rem; }
+.dayDate { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+
+.dayBody {
+  padding: 0.65rem 0.75rem;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.event {
+  background: linear-gradient(135deg, rgba(255,107,107,0.12), rgba(69,183,209,0.12));
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+.empty { color: var(--muted); font-size: 0.85rem; text-align: center; margin: auto; }
+
+.notesSection { width: 100%; }
+
+.notesBox {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  border-right: 5px solid #A78BFA;
+  min-height: 100px;
+}
+
+.notesText { font-size: 1rem; line-height: 1.8; white-space: pre-wrap; }
+
+.footer { text-align: center; padding: 1.5rem; border-top: 1px solid rgba(0,0,0,0.07); }
+
+.adminLink { color: var(--muted); text-decoration: none; font-size: 0.85rem; opacity: 0.7; }
+.adminLink:hover { opacity: 1; }
