@@ -20,8 +20,10 @@ export default function Admin() {
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
   const [newEvent, setNewEvent] = useState<Record<string, string>>({});
-  const [newStar, setNewStar]   = useState("");
-  const [openDay, setOpenDay]   = useState<string | null>(null);
+  const [newStar, setNewStar]       = useState("");
+  const [openDay, setOpenDay]       = useState<string | null>(null);
+  const [reminders, setReminders]   = useState<Record<string, string[]>>({});
+  const [newReminder, setNewReminder] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!authed) return;
@@ -29,6 +31,7 @@ export default function Admin() {
       setCalendar(d.calendar || {});
       setNotes(d.notes || []);
       setStars(d.stars || []);
+      setReminders(d.reminders || {});
     });
   }, [authed]);
 
@@ -38,11 +41,14 @@ export default function Admin() {
     else { setPinError(true); setPin(""); }
   };
 
-  const clearCalendar = () => {
-    if (!window.confirm("למחוק את כל האירועים של השבוע?")) return;
+  const clearAll = () => {
+    if (!window.confirm("למחוק את כל האירועים, ההודעות, הכוכבים והתזכורות?")) return;
     const empty: Record<string, string[]> = {};
     KEYS.forEach(k => (empty[k] = []));
     setCalendar(empty);
+    setReminders({ ...empty });
+    setNotes([]);
+    setStars([]);
   };
 
   const addEvent = (key: string) => {
@@ -74,12 +80,22 @@ export default function Admin() {
 
   const removeStar = (idx: number) => setStars(p => p.filter((_, i) => i !== idx));
 
+  const addReminder = (key: string) => {
+    const val = (newReminder[key] || "").trim();
+    if (!val) return;
+    setReminders(p => ({ ...p, [key]: [...(p[key] || []), val] }));
+    setNewReminder(p => ({ ...p, [key]: "" }));
+  };
+
+  const removeReminder = (key: string, idx: number) =>
+    setReminders(p => ({ ...p, [key]: p[key].filter((_, i) => i !== idx) }));
+
   const handleSave = async () => {
     setSaving(true);
     await fetch("/api/data", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ calendar, notes, stars }),
+      body: JSON.stringify({ calendar, notes, stars, reminders }),
     });
     setSaving(false); setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -141,7 +157,7 @@ export default function Admin() {
           <section>
             <div className={styles.sectionHeader}>
               <h2 className={styles.adminSectionTitle}>📅 אירועי השבוע</h2>
-              <button className={styles.clearBtn} onClick={clearCalendar}>🗑 מחק הכל</button>
+              <button className={styles.clearBtn} onClick={clearAll}>🗑 מחק הכל</button>
             </div>
             <div className={styles.desktopGrid}>
               {DAYS.map((dayName, i) => {
@@ -166,6 +182,24 @@ export default function Admin() {
                         onKeyDown={e => e.key === "Enter" && addEvent(key)}
                       />
                       <button className={styles.addBtn} onClick={() => addEvent(key)}>+</button>
+                    </div>
+                    <div className={styles.reminderBox}>
+                      <div className={styles.reminderTitle}>📌 חשוב לזכור</div>
+                      {(reminders[key] || []).map((r, j) => (
+                        <div key={j} className={styles.reminderItem}>
+                          <span>{r}</span>
+                          <button className={styles.removeBtn} onClick={() => removeReminder(key, j)}>✕</button>
+                        </div>
+                      ))}
+                      <div className={styles.addEventRow}>
+                        <input type="text" className={styles.addInput}
+                          placeholder="הוסיפי תזכורת..."
+                          value={newReminder[key] || ""}
+                          onChange={e => setNewReminder(p => ({ ...p, [key]: e.target.value }))}
+                          onKeyDown={e => e.key === "Enter" && addReminder(key)}
+                        />
+                        <button className={styles.addBtn} onClick={() => addReminder(key)}>+</button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -203,6 +237,24 @@ export default function Admin() {
                             autoFocus
                           />
                           <button className={styles.accordionAddBtn} onClick={() => addEvent(key)}>הוסיפי</button>
+                        </div>
+                        <div className={styles.reminderBox}>
+                          <div className={styles.reminderTitle}>📌 חשוב לזכור</div>
+                          {(reminders[key] || []).map((r, j) => (
+                            <div key={j} className={styles.reminderItem}>
+                              <span>{r}</span>
+                              <button className={styles.removeBtn} onClick={() => removeReminder(key, j)}>✕</button>
+                            </div>
+                          ))}
+                          <div className={styles.accordionAdd}>
+                            <input type="text" className={styles.accordionInput}
+                              placeholder="הוסיפי תזכורת..."
+                              value={newReminder[key] || ""}
+                              onChange={e => setNewReminder(p => ({ ...p, [key]: e.target.value }))}
+                              onKeyDown={e => e.key === "Enter" && addReminder(key)}
+                            />
+                            <button className={styles.accordionAddBtn} onClick={() => addReminder(key)}>הוסיפי</button>
+                          </div>
                         </div>
                       </div>
                     )}

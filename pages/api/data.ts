@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === "GET") {
     try {
       const { blobs } = await list({ prefix: FILENAME, token: TOKEN });
-      if (!blobs.length) return res.status(200).json({ calendar: {}, notes: [], stars: [] });
+      if (!blobs.length) return res.status(200).json({ calendar: {}, notes: [], stars: [], reminders: {} });
       const response = await fetch(blobs[0].url + "?t=" + Date.now());
       const data = await response.json();
       // migrate old string notes to array
@@ -17,14 +17,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
       return res.status(200).json(data);
     } catch (e: any) {
-      return res.status(200).json({ calendar: {}, notes: [], stars: [], error: e.message });
+      return res.status(200).json({ calendar: {}, notes: [], stars: [], reminders: {}, error: e.message });
     }
   }
 
   if (req.method === "POST") {
     try {
-      const { calendar, notes, stars } = req.body;
-      await put(FILENAME, JSON.stringify({ calendar, notes, stars }), {
+      const { calendar, notes, stars, reminders } = req.body;
+      await put(FILENAME, JSON.stringify({ calendar, notes, stars, reminders }), {
         access: "public",
         addRandomSuffix: false,
         allowOverwrite: true,

@@ -73,6 +73,14 @@ export default function Home() {
                             ? <span className={styles.empty}>—</span>
                             : events.map((ev, j) => <div key={j} className={styles.event}>{ev}</div>)
                           }
+                          {(data?.reminders?.[key] || []).length > 0 && (
+                            <div className={styles.remindersBlock}>
+                              <div className={styles.remindersLabel}>📌 חשוב לזכור</div>
+                              {(data.reminders[key] as string[]).map((r: string, j: number) => (
+                                <div key={j} className={styles.reminderEntry}>{r}</div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

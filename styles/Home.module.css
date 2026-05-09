@@ -118,6 +118,31 @@
 
 .empty { color: #aaa; font-size: 0.75rem; text-align: center; margin: auto; }
 
+.remindersBlock {
+  margin-top: 0.35rem;
+  background: rgba(255, 214, 0, 0.13);
+  border: 1px dashed rgba(180, 130, 0, 0.28);
+  border-radius: 6px;
+  padding: 0.3rem 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.remindersLabel {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #92610a;
+  margin-bottom: 0.1rem;
+}
+
+.reminderEntry {
+  font-size: 0.7rem;
+  line-height: 1.3;
+  color: #5a3e00;
+  font-weight: 500;
+}
+
 /* ── Notes ──────────────────────────────────────────────── */
 .notesSection { width: 100%; }
 
