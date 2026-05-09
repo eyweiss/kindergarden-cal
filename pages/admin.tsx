@@ -38,6 +38,13 @@ export default function Admin() {
     else { setPinError(true); setPin(""); }
   };
 
+  const clearCalendar = () => {
+    if (!window.confirm("למחוק את כל האירועים של השבוע?")) return;
+    const empty: Record<string, string[]> = {};
+    KEYS.forEach(k => (empty[k] = []));
+    setCalendar(empty);
+  };
+
   const addEvent = (key: string) => {
     const val = (newEvent[key] || "").trim();
     if (!val) return;
@@ -132,7 +139,10 @@ export default function Admin() {
 
           {/* Calendar */}
           <section>
-            <h2 className={styles.adminSectionTitle}>📅 אירועי השבוע</h2>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.adminSectionTitle}>📅 אירועי השבוע</h2>
+              <button className={styles.clearBtn} onClick={clearCalendar}>🗑 מחק הכל</button>
+            </div>
             <div className={styles.desktopGrid}>
               {DAYS.map((dayName, i) => {
                 const key = KEYS[i];

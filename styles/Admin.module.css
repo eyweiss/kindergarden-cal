@@ -106,6 +106,29 @@
   gap: 1.75rem;
 }
 
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.sectionHeader .adminSectionTitle { margin-bottom: 0; }
+
+.clearBtn {
+  background: linear-gradient(135deg, #FF6B6B, #e53e3e);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  font-family: 'Heebo', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+  white-space: nowrap;
+}
+.clearBtn:hover { opacity: 0.85; transform: translateY(-1px); }
+
 .adminSectionTitle {
   font-family: 'Secular One', sans-serif;
   font-size: 1.15rem;
