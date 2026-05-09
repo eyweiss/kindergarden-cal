@@ -25,7 +25,10 @@ export default function Home() {
   const dates = getWeekDates();
 
   useEffect(() => {
-    fetch("/api/data").then(r => r.json()).then(setData).catch(() => setData({}));
+    const load = () => fetch("/api/data").then(r => r.json()).then(setData).catch(() => {});
+    load();
+    const id = setInterval(load, 30_000);
+    return () => clearInterval(id);
   }, []);
 
   const weekLabel = `${dates[0].getDate()}/${dates[0].getMonth()+1} – ${dates[5].getDate()}/${dates[5].getMonth()+1}/${dates[5].getFullYear()}`;
