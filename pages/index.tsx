@@ -22,7 +22,12 @@ function getWeekDates() {
 
 export default function Home() {
   const [data, setData] = useState<any>(null);
+  const [hasSpeech, setHasSpeech] = useState(false);
   const dates = getWeekDates();
+
+  useEffect(() => {
+    setHasSpeech("speechSynthesis" in window);
+  }, []);
 
   useEffect(() => {
     const load = () => fetch("/api/data").then(r => r.json()).then(setData).catch(() => {});
@@ -71,6 +76,23 @@ export default function Home() {
                     const cardClass = [styles.dayCard, isSat ? styles.satCard : COLOR_CLASSES[key], isToday ? styles.todayCard : ""].filter(Boolean).join(" ");
                     return (
                       <div key={key} className={cardClass}>
+                        {isToday && hasSpeech && (
+                          <button
+                            className={styles.speakBtn}
+                            title="קרא בקול"
+                            aria-label="קרא בקול"
+                            onClick={() => {
+                              window.speechSynthesis.cancel();
+                              const parts: string[] = [`יום ${dayName}`];
+                              if (holiday) parts.push(holiday);
+                              events.forEach(ev => parts.push(ev));
+                              (data?.reminders?.[key] as string[] || []).forEach(r => parts.push(r));
+                              const utt = new SpeechSynthesisUtterance(parts.join(". "));
+                              utt.lang = "he-IL";
+                              window.speechSynthesis.speak(utt);
+                            }}
+                          >🔊</button>
+                        )}
                         <div className={styles.dayHeader}>
                           <span className={styles.dayName}>{dayName}</span>
                           <span className={styles.dayDate}>{dateStr}</span>
