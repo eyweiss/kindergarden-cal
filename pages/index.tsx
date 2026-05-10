@@ -62,21 +62,27 @@ export default function Home() {
               <section>
                 <h2 className={styles.sectionTitle}>📅 לוח שבועי</h2>
                 <div className={styles.calendarGrid}>
-                  {DAYS.map((dayName, i) => {
+                  {(() => {
+                    const today = new Date();
+                    const nextSchoolDay = new Date(today);
+                    nextSchoolDay.setDate(today.getDate() + 1);
+                    if (nextSchoolDay.getDay() === 6) nextSchoolDay.setDate(nextSchoolDay.getDate() + 1);
+                    return DAYS.map((dayName, i) => {
                     const key = KEYS[i];
                     const isSat = i === 6;
                     const events: string[] = data?.calendar?.[key] || [];
                     const holiday = getHolidayForDate(dates[i]);
                     const dateStr = `${dates[i].getDate()}/${dates[i].getMonth()+1}`;
-                    const today = new Date();
-                    const isToday = !isSat &&
-                      dates[i].getFullYear() === today.getFullYear() &&
-                      dates[i].getMonth() === today.getMonth() &&
-                      dates[i].getDate() === today.getDate();
+                    const sameDate = (d: Date) => !isSat &&
+                      dates[i].getFullYear() === d.getFullYear() &&
+                      dates[i].getMonth() === d.getMonth() &&
+                      dates[i].getDate() === d.getDate();
+                    const isToday = sameDate(today);
+                    const isNextSchoolDay = sameDate(nextSchoolDay);
                     const cardClass = [styles.dayCard, isSat ? styles.satCard : COLOR_CLASSES[key], isToday ? styles.todayCard : ""].filter(Boolean).join(" ");
                     return (
                       <div key={key} className={cardClass}>
-                        {isToday && hasSpeech && (
+                        {(isToday || isNextSchoolDay) && hasSpeech && (
                           <button
                             className={styles.speakBtn}
                             title="קרא בקול"
@@ -114,7 +120,7 @@ export default function Home() {
                         </div>
                       </div>
                     );
-                  })}
+                  });})()}
                 </div>
               </section>
 
