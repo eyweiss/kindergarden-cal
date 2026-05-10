@@ -75,6 +75,7 @@
 .fri  { border-top-color: #45B7D1 !important; }
 
 .dayCard:hover { transform: translateY(-2px); }
+.todayCard { box-shadow: 0 0 0 2px rgba(99,102,241,0.45), 0 4px 18px rgba(99,102,241,0.12); background: rgba(238,242,255,0.6) !important; }
 .satCard { background: #f0f0f0 !important; border-top-color: #ccc !important; opacity: 0.5; transform: none !important; }
 
 .dayHeader {

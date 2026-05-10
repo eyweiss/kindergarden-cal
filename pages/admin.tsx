@@ -24,6 +24,9 @@ export default function Admin() {
   const [openDay, setOpenDay]       = useState<string | null>(null);
   const [reminders, setReminders]   = useState<Record<string, string[]>>({});
   const [newReminder, setNewReminder] = useState<Record<string, string>>({});
+  const [whatsappOpen, setWhatsappOpen] = useState(false);
+  const [whatsappText, setWhatsappText] = useState("");
+  const [parsing, setParsing]           = useState(false);
 
   useEffect(() => {
     if (!authed) return;
@@ -90,6 +93,30 @@ export default function Admin() {
   const removeReminder = (key: string, idx: number) =>
     setReminders(p => ({ ...p, [key]: p[key].filter((_, i) => i !== idx) }));
 
+  const handleParse = async () => {
+    if (!whatsappText.trim()) return;
+    setParsing(true);
+    try {
+      const res = await fetch("/api/parse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: whatsappText }),
+      });
+      const data = await res.json();
+      KEYS.forEach(key => {
+        const items: { text: string; important: boolean }[] | undefined = data[key];
+        if (!Array.isArray(items) || items.length === 0) return;
+        setCalendar(p => ({ ...p, [key]: items.filter(e => !e.important).map(e => e.text) }));
+        setReminders(p => ({ ...p, [key]: items.filter(e => e.important).map(e => e.text) }));
+      });
+      if (Array.isArray(data.stars) && data.stars.length > 0) setStars(data.stars);
+    } catch (e) {
+      console.error("parse error", e);
+    } finally {
+      setParsing(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     await fetch("/api/data", {
@@ -152,6 +179,33 @@ export default function Admin() {
         </header>
 
         <main className={styles.adminMain}>
+
+          {/* WhatsApp Import */}
+          <section className={styles.whatsappSection}>
+            <button className={styles.whatsappToggle} onClick={() => setWhatsappOpen(p => !p)}>
+              <span className={styles.whatsappToggleTitle}>📱 ייבוא מהוואטסאפ</span>
+              <span className={styles.accordionArrow}>{whatsappOpen ? "▲" : "▼"}</span>
+            </button>
+            {whatsappOpen && (
+              <div className={styles.whatsappBody}>
+                <textarea
+                  className={styles.whatsappTextarea}
+                  value={whatsappText}
+                  onChange={e => setWhatsappText(e.target.value)}
+                  placeholder="הדביקי כאן הודעת וואטסאפ שבועית..."
+                  rows={6}
+                />
+                <button
+                  className={styles.parseBtn}
+                  onClick={handleParse}
+                  disabled={parsing || !whatsappText.trim()}
+                >
+                  {parsing && <span className={styles.spinner} />}
+                  {parsing ? "מנתח..." : "נתח הודעה"}
+                </button>
+              </div>
+            )}
+          </section>
 
           {/* Calendar */}
           <section>

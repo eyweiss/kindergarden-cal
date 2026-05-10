@@ -17,7 +17,8 @@
       "Bash(npm run:*)",
       "Bash(npm install:*)",
       "Bash(npx next:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?|json|css\\)$\")"
     ]
   }
 }

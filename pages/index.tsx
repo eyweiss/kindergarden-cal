@@ -63,7 +63,12 @@ export default function Home() {
                     const events: string[] = data?.calendar?.[key] || [];
                     const holiday = getHolidayForDate(dates[i]);
                     const dateStr = `${dates[i].getDate()}/${dates[i].getMonth()+1}`;
-                    const cardClass = [styles.dayCard, isSat ? styles.satCard : COLOR_CLASSES[key]].join(" ");
+                    const today = new Date();
+                    const isToday = !isSat &&
+                      dates[i].getFullYear() === today.getFullYear() &&
+                      dates[i].getMonth() === today.getMonth() &&
+                      dates[i].getDate() === today.getDate();
+                    const cardClass = [styles.dayCard, isSat ? styles.satCard : COLOR_CLASSES[key], isToday ? styles.todayCard : ""].filter(Boolean).join(" ");
                     return (
                       <div key={key} className={cardClass}>
                         <div className={styles.dayHeader}>
