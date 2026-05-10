@@ -70,20 +70,24 @@
 
 .speakBtn {
   position: absolute;
-  top: 4px;
-  left: 4px;
-  background: none;
-  border: none;
+  top: 5px;
+  left: 5px;
+  background: rgba(99,102,241,0.12);
+  border: 1px solid rgba(99,102,241,0.35);
   cursor: pointer;
-  font-size: 0.65rem;
-  padding: 2px 3px;
+  font-size: 0.8rem;
+  padding: 3px 5px;
   line-height: 1;
-  opacity: 0.55;
-  border-radius: 4px;
-  transition: opacity 0.15s, background 0.15s;
+  border-radius: 6px;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
   z-index: 1;
+  box-shadow: 0 1px 4px rgba(99,102,241,0.15);
 }
-.speakBtn:hover { opacity: 1; background: rgba(0,0,0,0.07); }
+.speakBtn:hover {
+  background: rgba(99,102,241,0.25);
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+  transform: scale(1.1);
+}
 
 .sun  { border-top-color: #FF6B6B !important; }
 .mon  { border-top-color: #FF8E53 !important; }
