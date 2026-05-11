@@ -23,10 +23,18 @@ function getWeekDates() {
 export default function Home() {
   const [data, setData] = useState<any>(null);
   const [hasSpeech, setHasSpeech] = useState(false);
-  const dates = getWeekDates();
+  const [dates, setDates] = useState<Date[]>(getWeekDates);
 
   useEffect(() => {
     setHasSpeech("speechSynthesis" in window);
+  }, []);
+
+  useEffect(() => {
+    // Recompute on the client to correct any SSR timezone mismatch,
+    // and refresh every minute so the highlight updates after midnight.
+    setDates(getWeekDates());
+    const id = setInterval(() => setDates(getWeekDates()), 60_000);
+    return () => clearInterval(id);
   }, []);
 
   useEffect(() => {
