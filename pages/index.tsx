@@ -22,6 +22,7 @@ function getWeekDates() {
 
 export default function Home() {
   const [data, setData] = useState<any>(null);
+  const [weather, setWeather] = useState<{ temp: number; emoji: string } | null>(null);
   const [hasSpeech, setHasSpeech] = useState(false);
   const [dates, setDates] = useState<Date[]>(getWeekDates);
   // null during SSR so no day is highlighted until the client runs — prevents
@@ -48,6 +49,10 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    fetch("/api/weather").then(r => r.json()).then(d => d.temp != null && setWeather(d)).catch(() => {});
+  }, []);
+
   const weekLabel = `${dates[0].getDate()}/${dates[0].getMonth()+1} – ${dates[5].getDate()}/${dates[5].getMonth()+1}/${dates[5].getFullYear()}`;
   const stars: string[] = data?.stars || [];
   const notes: any[] = data?.notes || [];
@@ -61,6 +66,12 @@ export default function Home() {
       </Head>
       <div className={styles.page} dir="rtl">
         <header className={styles.header}>
+          {weather && (
+            <div className={styles.weatherBadge}>
+              <span>{weather.emoji}</span>
+              <span>{weather.temp}°</span>
+            </div>
+          )}
           <div className={styles.headerEmojis}>🌈 🦋 🌻</div>
           <h1 className={styles.title}>לוח גן לבנון ה'תשפ"ו</h1>
           <p className={styles.subtitle}>שבוע {weekLabel}</p>
