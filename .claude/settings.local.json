@@ -18,7 +18,8 @@
       "Bash(npm install:*)",
       "Bash(npx next:*)",
       "Bash(ls:*)",
-      "Bash(grep -E \"\\\\.\\(tsx?|jsx?|json|css\\)$\")"
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?|json|css\\)$\")",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
