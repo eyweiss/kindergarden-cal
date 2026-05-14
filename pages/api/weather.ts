@@ -14,19 +14,21 @@ function wmoEmoji(code: number): string {
   return "⛈️";
 }
 
-let cache: { data: { temp: number; emoji: string }; ts: number } | null = null;
+let cache: { data: { temp: number; emoji: string; tempMin: number; tempMax: number }; ts: number } | null = null;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (cache && Date.now() - cache.ts < CACHE_MS) {
     return res.json(cache.data);
   }
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&timezone=Asia%2FJerusalem`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&daily=temperature_2m_min,temperature_2m_max&timezone=Asia%2FJerusalem`;
     const r = await fetch(url);
     const json = await r.json();
     const data = {
       temp: Math.round(json.current.temperature_2m),
       emoji: wmoEmoji(json.current.weather_code),
+      tempMin: Math.round(json.daily.temperature_2m_min[0]),
+      tempMax: Math.round(json.daily.temperature_2m_max[0]),
     };
     cache = { data, ts: Date.now() };
     res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate");

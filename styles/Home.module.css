@@ -184,6 +184,26 @@
   font-weight: 500;
 }
 
+/* ── Weather range strip ────────────────────────────────── */
+.weatherRange {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  padding: 0.4rem 1rem;
+  background: rgba(69,183,209,0.1);
+  border: 1px solid rgba(69,183,209,0.25);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: #444;
+}
+
+.weatherRangeTemps {
+  font-weight: 700;
+  color: #1a6ea8;
+}
+
 /* ── Notes ──────────────────────────────────────────────── */
 .notesSection { width: 100%; }
 

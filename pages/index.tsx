@@ -22,7 +22,7 @@ function getWeekDates() {
 
 export default function Home() {
   const [data, setData] = useState<any>(null);
-  const [weather, setWeather] = useState<{ temp: number; emoji: string } | null>(null);
+  const [weather, setWeather] = useState<{ temp: number; emoji: string; tempMin: number; tempMax: number } | null>(null);
   const [hasSpeech, setHasSpeech] = useState(false);
   const [dates, setDates] = useState<Date[]>(getWeekDates);
   // null during SSR so no day is highlighted until the client runs — prevents
@@ -147,6 +147,13 @@ export default function Home() {
                     );
                   });})()}
                 </div>
+                {weather && (
+                  <div className={styles.weatherRange}>
+                    <span>{weather.emoji}</span>
+                    <span>טמפרטורה היום</span>
+                    <span className={styles.weatherRangeTemps}>{weather.tempMin}° – {weather.tempMax}°</span>
+                  </div>
+                )}
               </section>
 
               {/* Notes feed */}
