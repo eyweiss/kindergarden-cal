@@ -24,16 +24,20 @@ export default function Home() {
   const [data, setData] = useState<any>(null);
   const [hasSpeech, setHasSpeech] = useState(false);
   const [dates, setDates] = useState<Date[]>(getWeekDates);
+  // null during SSR so no day is highlighted until the client runs — prevents
+  // stale server-timezone dates from pinning the highlight to the wrong day.
+  const [today, setToday] = useState<Date | null>(null);
 
   useEffect(() => {
     setHasSpeech("speechSynthesis" in window);
   }, []);
 
   useEffect(() => {
-    // Recompute on the client to correct any SSR timezone mismatch,
-    // and refresh every minute so the highlight updates after midnight.
-    setDates(getWeekDates());
-    const id = setInterval(() => setDates(getWeekDates()), 60_000);
+    // Keep today and dates in sync; both are set from the same client clock so
+    // they can never disagree about which calendar day is "now".
+    const update = () => { setToday(new Date()); setDates(getWeekDates()); };
+    update();
+    const id = setInterval(update, 60_000);
     return () => clearInterval(id);
   }, []);
 
@@ -71,10 +75,12 @@ export default function Home() {
                 <h2 className={styles.sectionTitle}>📅 לוח שבועי</h2>
                 <div className={styles.calendarGrid}>
                   {(() => {
-                    const today = new Date();
-                    const nextSchoolDay = new Date(today);
-                    nextSchoolDay.setDate(today.getDate() + 1);
-                    if (nextSchoolDay.getDay() === 6) nextSchoolDay.setDate(nextSchoolDay.getDate() + 1);
+                    const nextSchoolDay = today ? (() => {
+                      const d = new Date(today);
+                      d.setDate(today.getDate() + 1);
+                      if (d.getDay() === 6) d.setDate(d.getDate() + 1);
+                      return d;
+                    })() : null;
                     return DAYS.map((dayName, i) => {
                     const key = KEYS[i];
                     const isSat = i === 6;
@@ -85,8 +91,8 @@ export default function Home() {
                       dates[i].getFullYear() === d.getFullYear() &&
                       dates[i].getMonth() === d.getMonth() &&
                       dates[i].getDate() === d.getDate();
-                    const isToday = sameDate(today);
-                    const isNextSchoolDay = sameDate(nextSchoolDay);
+                    const isToday = today ? sameDate(today) : false;
+                    const isNextSchoolDay = nextSchoolDay ? sameDate(nextSchoolDay) : false;
                     const cardClass = [styles.dayCard, isSat ? styles.satCard : COLOR_CLASSES[key], isToday ? styles.todayCard : ""].filter(Boolean).join(" ");
                     return (
                       <div key={key} className={cardClass}>
