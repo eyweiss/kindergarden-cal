@@ -14,3 +14,7 @@
 }
 html, body { padding: 0; margin: 0; font-family: 'Heebo', sans-serif; background: #FFF8F0; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Switch to Rubik for Russian (Cyrillic) — overrides Heebo and Secular One */
+[data-lang="ru"] { font-family: 'Rubik', sans-serif !important; }
+[data-lang="ru"] * { font-family: 'Rubik', sans-serif !important; }

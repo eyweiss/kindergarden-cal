@@ -4,7 +4,69 @@ import Link from "next/link";
 import { getHolidayForDate } from "../lib/holidays";
 import styles from "../styles/Home.module.css";
 
-const DAYS  = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+type Lang = "he" | "en" | "ru";
+
+const DAYS_MAP: Record<Lang, string[]> = {
+  he: ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"],
+  en: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+  ru: ["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"],
+};
+
+const SPEECH_LANG: Record<Lang, string> = {
+  he: "he-IL",
+  en: "en-US",
+  ru: "ru-RU",
+};
+
+const T: Record<Lang, {
+  title: string; week: string; calendar: string; notes: string;
+  noNotes: string; stars: string; noStars: string; remindersLabel: string;
+  speakTitle: string; tempToday: string; adminLink: string; dayPrefix: string;
+}> = {
+  he: {
+    title: "לוח גן לבנון ה'תשפ\"ו",
+    week: "שבוע",
+    calendar: "📅 לוח שבועי",
+    notes: "📝 הודעות והערות",
+    noNotes: "אין הודעות השבוע",
+    stars: "⭐ כוכבי השבוע",
+    noStars: "אין כוכבים השבוע עדיין",
+    remindersLabel: "📌 חשוב לזכור",
+    speakTitle: "קרא בקול",
+    tempToday: "טמפרטורה היום",
+    adminLink: "כניסת גננת 🔐",
+    dayPrefix: "יום ",
+  },
+  en: {
+    title: "Lebanon Kindergarten 2025–26",
+    week: "Week",
+    calendar: "📅 Weekly Calendar",
+    notes: "📝 Messages & Notes",
+    noNotes: "No messages this week",
+    stars: "⭐ Stars of the Week",
+    noStars: "No stars this week yet",
+    remindersLabel: "📌 Remember",
+    speakTitle: "Read aloud",
+    tempToday: "Today's temperature",
+    adminLink: "Teacher login 🔐",
+    dayPrefix: "",
+  },
+  ru: {
+    title: "Детский сад «Ливан» 2025–26",
+    week: "Неделя",
+    calendar: "📅 Еженедельный календарь",
+    notes: "📝 Сообщения и заметки",
+    noNotes: "Нет сообщений на этой неделе",
+    stars: "⭐ Звёзды недели",
+    noStars: "Звёзд пока нет",
+    remindersLabel: "📌 Не забыть",
+    speakTitle: "Прочитать вслух",
+    tempToday: "Температура сегодня",
+    adminLink: "Вход для воспитателя 🔐",
+    dayPrefix: "",
+  },
+};
+
 const KEYS  = ["sun","mon","tue","wed","thu","fri","sat"];
 const COLOR_CLASSES: Record<string, string> = {
   sun: styles.sun, mon: styles.mon, tue: styles.tue,
@@ -28,9 +90,12 @@ export default function Home() {
   // null during SSR so no day is highlighted until the client runs — prevents
   // stale server-timezone dates from pinning the highlight to the wrong day.
   const [today, setToday] = useState<Date | null>(null);
+  const [lang, setLang] = useState<Lang>("he");
 
   useEffect(() => {
     setHasSpeech("speechSynthesis" in window);
+    const saved = localStorage.getItem("lang") as Lang | null;
+    if (saved && (saved === "he" || saved === "en" || saved === "ru")) setLang(saved);
   }, []);
 
   useEffect(() => {
@@ -53,6 +118,14 @@ export default function Home() {
     fetch("/api/weather").then(r => r.json()).then(d => d.temp != null && setWeather(d)).catch(() => {});
   }, []);
 
+  function changeLang(l: Lang) {
+    setLang(l);
+    localStorage.setItem("lang", l);
+  }
+
+  const t = T[lang];
+  const DAYS = DAYS_MAP[lang];
+  const dir = lang === "he" ? "rtl" : "ltr";
   const weekLabel = `${dates[0].getDate()}/${dates[0].getMonth()+1} – ${dates[5].getDate()}/${dates[5].getMonth()+1}/${dates[5].getFullYear()}`;
   const stars: string[] = data?.stars || [];
   const notes: any[] = data?.notes || [];
@@ -62,9 +135,9 @@ export default function Home() {
       <Head>
         <title>לוח גן לבנון</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Heebo:wght@300;400;500;700&family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet" />
       </Head>
-      <div className={styles.page} dir="rtl">
+      <div className={styles.page} dir={dir} data-lang={lang}>
         <header className={styles.header}>
           {weather && (
             <div className={styles.weatherBadge}>
@@ -72,9 +145,26 @@ export default function Home() {
               <span>{weather.temp}°</span>
             </div>
           )}
+          <div className={styles.langToggle}>
+            <button
+              className={`${styles.langBtn} ${lang === "he" ? styles.langBtnActive : ""}`}
+              onClick={() => changeLang("he")}
+              aria-label="עברית"
+            >עב</button>
+            <button
+              className={`${styles.langBtn} ${lang === "en" ? styles.langBtnActive : ""}`}
+              onClick={() => changeLang("en")}
+              aria-label="English"
+            >EN</button>
+            <button
+              className={`${styles.langBtn} ${lang === "ru" ? styles.langBtnActive : ""}`}
+              onClick={() => changeLang("ru")}
+              aria-label="Русский"
+            >РУ</button>
+          </div>
           <div className={styles.headerEmojis}>🌈 🦋 🌻</div>
-          <h1 className={styles.title}>לוח גן לבנון ה'תשפ"ו</h1>
-          <p className={styles.subtitle}>שבוע {weekLabel}</p>
+          <h1 className={styles.title}>{t.title}</h1>
+          <p className={styles.subtitle}>{t.week} {weekLabel}</p>
         </header>
 
         <main className={styles.main}>
@@ -83,7 +173,7 @@ export default function Home() {
 
               {/* Calendar */}
               <section>
-                <h2 className={styles.sectionTitle}>📅 לוח שבועי</h2>
+                <h2 className={styles.sectionTitle}>{t.calendar}</h2>
                 <div className={styles.calendarGrid}>
                   {(() => {
                     const nextSchoolDay = today ? (() => {
@@ -110,17 +200,24 @@ export default function Home() {
                         {(isToday || isNextSchoolDay) && hasSpeech && (
                           <button
                             className={styles.speakBtn}
-                            title="קרא בקול"
-                            aria-label="קרא בקול"
+                            title={t.speakTitle}
+                            aria-label={t.speakTitle}
                             onClick={() => {
                               window.speechSynthesis.cancel();
-                              const parts: string[] = [`יום ${dayName}`];
+                              // Speak day name in selected language
+                              const dayUtt = new SpeechSynthesisUtterance(`${t.dayPrefix}${dayName}`);
+                              dayUtt.lang = SPEECH_LANG[lang];
+                              window.speechSynthesis.speak(dayUtt);
+                              // Speak calendar content in Hebrew (content is stored in Hebrew)
+                              const parts: string[] = [];
                               if (holiday) parts.push(holiday);
                               events.forEach(ev => parts.push(ev));
                               (data?.reminders?.[key] as string[] || []).forEach(r => parts.push(r));
-                              const utt = new SpeechSynthesisUtterance(parts.join(". "));
-                              utt.lang = "he-IL";
-                              window.speechSynthesis.speak(utt);
+                              if (parts.length > 0) {
+                                const contentUtt = new SpeechSynthesisUtterance(parts.join(". "));
+                                contentUtt.lang = "he-IL";
+                                window.speechSynthesis.speak(contentUtt);
+                              }
                             }}
                           >🔊</button>
                         )}
@@ -136,7 +233,7 @@ export default function Home() {
                           }
                           {(data?.reminders?.[key] || []).length > 0 && (
                             <div className={styles.remindersBlock}>
-                              <div className={styles.remindersLabel}>📌 חשוב לזכור</div>
+                              <div className={styles.remindersLabel}>{t.remindersLabel}</div>
                               {(data.reminders[key] as string[]).map((r: string, j: number) => (
                                 <div key={j} className={styles.reminderEntry}>{r}</div>
                               ))}
@@ -150,7 +247,7 @@ export default function Home() {
                 {weather && (
                   <div className={styles.weatherRange}>
                     <span>{weather.emoji}</span>
-                    <span>טמפרטורה היום</span>
+                    <span>{t.tempToday}</span>
                     <span className={styles.weatherRangeTemps}>{weather.tempMin}° – {weather.tempMax}°</span>
                   </div>
                 )}
@@ -158,10 +255,10 @@ export default function Home() {
 
               {/* Notes feed */}
               <section className={styles.notesSection}>
-                <h2 className={styles.sectionTitle}>📝 הודעות והערות</h2>
+                <h2 className={styles.sectionTitle}>{t.notes}</h2>
                 <div className={styles.notesFeed}>
                   {notes.length === 0
-                    ? <p className={styles.emptyNotes}>אין הודעות השבוע</p>
+                    ? <p className={styles.emptyNotes}>{t.noNotes}</p>
                     : notes.map((note: any) => (
                         <div key={note.id} className={styles.noteCard}>
                           <p className={styles.noteText}>{note.text}</p>
@@ -177,10 +274,10 @@ export default function Home() {
             {/* Stars */}
             <div className={styles.rightCol}>
               <section className={styles.starsSection}>
-                <h2 className={styles.starsSectionTitle}>⭐ כוכבי השבוע</h2>
+                <h2 className={styles.starsSectionTitle}>{t.stars}</h2>
                 <div className={styles.starsBox}>
                   {stars.length === 0
-                    ? <p className={styles.empty}>אין כוכבים השבוע עדיין</p>
+                    ? <p className={styles.empty}>{t.noStars}</p>
                     : stars.map((star, i) => (
                         <div key={i} className={styles.starItem}>
                           <span className={styles.starEmoji}>⭐</span>
@@ -195,7 +292,7 @@ export default function Home() {
         </main>
 
         <footer className={styles.footer}>
-          <Link href="/admin" className={styles.adminLink}>כניסת גננת 🔐</Link>
+          <Link href="/admin" className={styles.adminLink}>{t.adminLink}</Link>
         </footer>
       </div>
     </>

@@ -107,6 +107,41 @@
   transform: scale(1.1);
 }
 
+/* ── Language toggle ────────────────────────────────────── */
+.langToggle {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  gap: 0.25rem;
+  z-index: 10;
+}
+
+.langBtn {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.15s, transform 0.1s;
+  backdrop-filter: blur(4px);
+}
+
+.langBtn:hover {
+  background: rgba(255,255,255,0.35);
+  transform: scale(1.05);
+}
+
+.langBtnActive {
+  background: rgba(255,255,255,0.55) !important;
+  color: #2D2D2D;
+  border-color: rgba(255,255,255,0.8);
+}
+
 .sun  { border-top-color: #FF6B6B !important; }
 .mon  { border-top-color: #FF8E53 !important; }
 .tue  { border-top-color: #FFD93D !important; }
