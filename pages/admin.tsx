@@ -19,6 +19,7 @@ export default function Admin() {
   const [stars, setStars]       = useState<string[]>([]);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [newEvent, setNewEvent] = useState<Record<string, string>>({});
   const [newStar, setNewStar]       = useState("");
   const [openDay, setOpenDay]       = useState<string | null>(null);
@@ -129,13 +130,25 @@ export default function Admin() {
 
   const handleSave = async () => {
     setSaving(true);
-    await fetch("/api/data", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ calendar, notes, stars, reminders }),
-    });
-    setSaving(false); setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setSaveError(null);
+    try {
+      const res = await fetch("/api/data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ calendar, notes, stars, reminders }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        setSaveError(json.error || `שגיאת שרת (${res.status})`);
+      } else {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch (e: any) {
+      setSaveError(e?.message || "שגיאת רשת");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!authed) return (
@@ -178,6 +191,7 @@ export default function Admin() {
         <header className={styles.adminHeader}>
           <h1 className={styles.adminTitle}>✏️ לוח גן לבנון</h1>
           <div className={styles.headerActions}>
+            {saveError && <span className={styles.saveErrorMsg}>⚠️ {saveError}</span>}
             <button
               className={`${styles.saveBtn} ${saved ? styles.savedBtn : ""}`}
               onClick={handleSave} disabled={saving}

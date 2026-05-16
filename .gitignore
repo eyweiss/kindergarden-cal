@@ -3,5 +3,6 @@ node_modules/
 .vercel/
 .env*.local
 *.log
+.data/
 
 .vercel
