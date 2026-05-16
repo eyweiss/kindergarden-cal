@@ -91,6 +91,7 @@ export default function Home() {
   // stale server-timezone dates from pinning the highlight to the wrong day.
   const [today, setToday] = useState<Date | null>(null);
   const [lang, setLang] = useState<Lang>("he");
+  const [txCache, setTxCache] = useState<Record<string, Record<string, string>>>({ en: {}, ru: {} });
 
   useEffect(() => {
     setHasSpeech("speechSynthesis" in window);
@@ -117,6 +118,32 @@ export default function Home() {
   useEffect(() => {
     fetch("/api/weather").then(r => r.json()).then(d => d.temp != null && setWeather(d)).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (lang === "he" || !data) return;
+    const seen = txCache[lang] ?? {};
+    const unique = [...new Set<string>([
+      ...KEYS.flatMap(k => [...(data?.calendar?.[k] ?? []), ...(data?.reminders?.[k] ?? [])]),
+      ...(data?.notes ?? []).map((n: any) => n.text),
+    ].filter((t): t is string => !!t && !seen[t]))];
+    if (unique.length === 0) return;
+    fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texts: unique, lang }),
+    })
+      .then(r => r.json())
+      .then(({ translated }) => {
+        if (!Array.isArray(translated)) return;
+        setTxCache(prev => ({
+          ...prev,
+          [lang]: { ...prev[lang], ...Object.fromEntries(unique.map((t, i) => [t, translated[i] ?? t])) },
+        }));
+      })
+      .catch(() => {});
+  }, [lang, data]);
+
+  const tx = (text: string) => lang === "he" ? text : (txCache[lang]?.[text] ?? text);
 
   function changeLang(l: Lang) {
     setLang(l);
@@ -229,13 +256,13 @@ export default function Home() {
                           {holiday && <div className={styles.holiday}>✡️ {holiday}</div>}
                           {events.length === 0 && !holiday
                             ? <span className={styles.empty}>—</span>
-                            : events.map((ev, j) => <div key={j} className={styles.event}>{ev}</div>)
+                            : events.map((ev, j) => <div key={j} className={styles.event}>{tx(ev)}</div>)
                           }
                           {(data?.reminders?.[key] || []).length > 0 && (
                             <div className={styles.remindersBlock}>
                               <div className={styles.remindersLabel}>{t.remindersLabel}</div>
                               {(data.reminders[key] as string[]).map((r: string, j: number) => (
-                                <div key={j} className={styles.reminderEntry}>{r}</div>
+                                <div key={j} className={styles.reminderEntry}>{tx(r)}</div>
                               ))}
                             </div>
                           )}
@@ -261,7 +288,7 @@ export default function Home() {
                     ? <p className={styles.emptyNotes}>{t.noNotes}</p>
                     : notes.map((note: any) => (
                         <div key={note.id} className={styles.noteCard}>
-                          <p className={styles.noteText}>{note.text}</p>
+                          <p className={styles.noteText}>{tx(note.text)}</p>
                           <span className={styles.noteDate}>{note.date}</span>
                         </div>
                       ))
