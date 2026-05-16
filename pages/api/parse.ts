@@ -22,20 +22,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { text } = req.body as { text?: string };
   if (!text?.trim()) return res.status(400).json({ error: "Missing text" });
 
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: text }],
-  });
-
-  const block = message.content[0];
-  if (block.type !== "text") return res.status(500).json({ error: "Unexpected response type" });
-
-  const raw = block.text.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
   try {
-    return res.status(200).json(JSON.parse(raw));
-  } catch {
-    return res.status(500).json({ error: "Failed to parse Claude response", raw });
+    const message = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 1024,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: text }],
+    });
+
+    const block = message.content[0];
+    if (block.type !== "text") return res.status(500).json({ error: "Unexpected response type" });
+
+    const raw = block.text.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
+    try {
+      return res.status(200).json(JSON.parse(raw));
+    } catch {
+      return res.status(500).json({ error: "Failed to parse Claude response", raw });
+    }
+  } catch (e: any) {
+    return res.status(500).json({ error: e?.message || "Claude API error" });
   }
 }

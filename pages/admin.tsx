@@ -27,6 +27,8 @@ export default function Admin() {
   const [whatsappOpen, setWhatsappOpen] = useState(false);
   const [whatsappText, setWhatsappText] = useState("");
   const [parsing, setParsing]           = useState(false);
+  const [parseError, setParseError]     = useState<string | null>(null);
+  const [parseOk, setParseOk]           = useState(false);
 
   useEffect(() => {
     if (!authed) return;
@@ -96,6 +98,8 @@ export default function Admin() {
   const handleParse = async () => {
     if (!whatsappText.trim()) return;
     setParsing(true);
+    setParseError(null);
+    setParseOk(false);
     try {
       const res = await fetch("/api/parse", {
         method: "POST",
@@ -103,6 +107,10 @@ export default function Admin() {
         body: JSON.stringify({ text: whatsappText }),
       });
       const data = await res.json();
+      if (!res.ok || data.error) {
+        setParseError(data.error || `שגיאת שרת (${res.status})`);
+        return;
+      }
       KEYS.forEach(key => {
         const items: { text: string; important: boolean }[] | undefined = data[key];
         if (!Array.isArray(items) || items.length === 0) return;
@@ -110,8 +118,10 @@ export default function Admin() {
         setReminders(p => ({ ...p, [key]: items.filter(e => e.important).map(e => e.text) }));
       });
       if (Array.isArray(data.stars) && data.stars.length > 0) setStars(data.stars);
-    } catch (e) {
-      console.error("parse error", e);
+      setParseOk(true);
+      setTimeout(() => setParseOk(false), 4000);
+    } catch (e: any) {
+      setParseError(e?.message || "שגיאת רשת");
     } finally {
       setParsing(false);
     }
@@ -203,6 +213,12 @@ export default function Admin() {
                   {parsing && <span className={styles.spinner} />}
                   {parsing ? "מנתח..." : "נתח הודעה"}
                 </button>
+                {parseError && (
+                  <p className={styles.parseErrorMsg}>⚠️ {parseError}</p>
+                )}
+                {parseOk && (
+                  <p className={styles.parseOkMsg}>✓ יובא בהצלחה — זכרי לשמור</p>
+                )}
               </div>
             )}
           </section>
