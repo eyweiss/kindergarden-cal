@@ -26,24 +26,31 @@ function migrateNotes(data: any) {
   return data;
 }
 
+function getRedisConfig() {
+  // Upstash direct integration
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+    return { url: process.env.UPSTASH_REDIS_REST_URL, token: process.env.UPSTASH_REDIS_REST_TOKEN };
+  // Vercel KV integration (also backed by Upstash, different var names)
+  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
+    return { url: process.env.KV_REST_API_URL, token: process.env.KV_REST_API_TOKEN };
+  return null;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const useRedis = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+  const redisCfg = getRedisConfig();
   const onVercel = !!process.env.VERCEL;
 
-  if (!useRedis && onVercel) {
-    const msg = "Storage not configured: add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in Vercel → Storage → Upstash Redis";
+  if (!redisCfg && onVercel) {
+    const msg = "Storage not configured: connect an Upstash Redis store in Vercel → Storage";
     if (req.method === "GET") return res.status(200).json({ ...EMPTY, error: msg });
     return res.status(503).json({ ok: false, error: msg });
   }
 
   if (req.method === "GET") {
-    if (!useRedis) return res.status(200).json(migrateNotes(readLocal()));
+    if (!redisCfg) return res.status(200).json(migrateNotes(readLocal()));
     try {
       const { Redis } = await import("@upstash/redis");
-      const redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL!,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-      });
+      const redis = new Redis(redisCfg);
       const data = (await redis.get<object>(REDIS_KEY)) ?? EMPTY;
       return res.status(200).json(migrateNotes(data));
     } catch (e: any) {
@@ -53,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "POST") {
     const { calendar, notes, stars, reminders } = req.body;
-    if (!useRedis) {
+    if (!redisCfg) {
       try {
         writeLocal({ calendar, notes, stars, reminders });
         return res.status(200).json({ ok: true });
@@ -63,10 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     try {
       const { Redis } = await import("@upstash/redis");
-      const redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL!,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-      });
+      const redis = new Redis(redisCfg);
       await redis.set(REDIS_KEY, { calendar, notes, stars, reminders });
       return res.status(200).json({ ok: true });
     } catch (e: any) {
