@@ -28,6 +28,13 @@ function migrateNotes(data: any) {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const useRedis = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+  const onVercel = !!process.env.VERCEL;
+
+  if (!useRedis && onVercel) {
+    const msg = "Storage not configured: add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in Vercel → Storage → Upstash Redis";
+    if (req.method === "GET") return res.status(200).json({ ...EMPTY, error: msg });
+    return res.status(503).json({ ok: false, error: msg });
+  }
 
   if (req.method === "GET") {
     if (!useRedis) return res.status(200).json(migrateNotes(readLocal()));
