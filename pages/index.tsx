@@ -24,7 +24,7 @@ const T: Record<Lang, {
   speakTitle: string; tempToday: string; adminLink: string; dayPrefix: string;
 }> = {
   he: {
-    title: "לוח גן לבנון ה'תשפ\"ו",
+    title: "לוח גן לבנון ה'תשפ\"ז",
     week: "שבוע",
     calendar: "📅 לוח שבועי",
     notes: "📝 הודעות והערות",
@@ -38,7 +38,7 @@ const T: Record<Lang, {
     dayPrefix: "יום ",
   },
   en: {
-    title: "Lebanon Kindergarten 2025–26",
+    title: "Lebanon Kindergarten 2026–27",
     week: "Week",
     calendar: "📅 Weekly Calendar",
     notes: "📝 Messages & Notes",
@@ -52,7 +52,7 @@ const T: Record<Lang, {
     dayPrefix: "",
   },
   ru: {
-    title: "Детский сад «Ливан» 2025–26",
+    title: "Детский сад «Ливан» 2026–27",
     week: "Неделя",
     calendar: "📅 Еженедельный календарь",
     notes: "📝 Сообщения и заметки",
