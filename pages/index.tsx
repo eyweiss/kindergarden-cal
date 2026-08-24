@@ -38,7 +38,7 @@ const T: Record<Lang, {
     dayPrefix: "יום ",
   },
   en: {
-    title: "Lebanon Kindergarten 2026–27",
+    title: "Lavnun Kindergarten 2026–27",
     week: "Week",
     calendar: "📅 Weekly Calendar",
     notes: "📝 Messages & Notes",
@@ -52,7 +52,7 @@ const T: Record<Lang, {
     dayPrefix: "",
   },
   ru: {
-    title: "Детский сад «Ливан» 2026–27",
+    title: "Детский сад «Лавнун» 2026–27",
     week: "Неделя",
     calendar: "📅 Еженедельный календарь",
     notes: "📝 Сообщения и заметки",
