@@ -5,10 +5,15 @@ import path from "path";
 const DATA_FILE = path.join(process.cwd(), ".data", "gan-data.json");
 const EMPTY = { calendar: {}, notes: [], stars: [], reminders: {} };
 const BLOB_FILE = "gan-data.json";
-// A Blob store is created as either public or private, and calls must match it
-// or the API rejects them. Set BLOB_ACCESS=public for a store created as public.
-const BLOB_ACCESS: "public" | "private" =
-  process.env.BLOB_ACCESS === "public" ? "public" : "private";
+
+// A Blob store is created as either public or private, and every call must
+// match it or the API rejects the call. Rather than hardcode a guess, learn the
+// mode from the store itself and remember it for the life of this instance.
+type Access = "public" | "private";
+let blobAccess: Access = process.env.BLOB_ACCESS === "public" ? "public" : "private";
+const otherAccess = (a: Access): Access => (a === "public" ? "private" : "public");
+const isAccessMismatch = (e: any) =>
+  /Cannot use (public|private) access on a (public|private) store/.test(e?.message ?? "");
 
 function readLocal() {
   try { return JSON.parse(fs.readFileSync(DATA_FILE, "utf8")); }
@@ -46,14 +51,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === "GET") {
     if (!hasBlobToken) return res.status(200).json(migrateNotes(readLocal()));
     try {
-      const { get } = await import("@vercel/blob");
+      const { head, get, BlobNotFoundError } = await import("@vercel/blob");
+      const token = process.env.BLOB_READ_WRITE_TOKEN;
+      // head() needs no access mode, and the URL it returns reveals the store's.
+      let meta;
+      try { meta = await head(BLOB_FILE, { token }); }
+      catch (e) {
+        if (e instanceof BlobNotFoundError) return res.status(200).json(EMPTY);
+        throw e;
+      }
+      blobAccess = meta.url.includes(".private.") ? "private" : "public";
       // useCache: false reads from origin storage, so the parents' board never
       // serves a stale copy of what the teacher just saved.
-      const result = await get(BLOB_FILE, {
-        access: BLOB_ACCESS,
-        useCache: false,
-        token: process.env.BLOB_READ_WRITE_TOKEN,
-      });
+      const result = await get(BLOB_FILE, { access: blobAccess, useCache: false, token });
       if (!result || result.statusCode !== 200) return res.status(200).json(EMPTY);
       const data = await new Response(result.stream).json();
       return res.status(200).json(migrateNotes(data));
@@ -74,13 +84,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     try {
       const { put } = await import("@vercel/blob");
-      await put(BLOB_FILE, JSON.stringify({ calendar, notes, stars, reminders }), {
-        access: BLOB_ACCESS,
+      const body = JSON.stringify({ calendar, notes, stars, reminders });
+      const opts = {
         allowOverwrite: true,
         addRandomSuffix: false,
         contentType: "application/json",
         token: process.env.BLOB_READ_WRITE_TOKEN,
-      });
+      };
+      try {
+        await put(BLOB_FILE, body, { access: blobAccess, ...opts });
+      } catch (e) {
+        if (!isAccessMismatch(e)) throw e;
+        // The API just told us the store's real mode; remember it and retry once.
+        blobAccess = otherAccess(blobAccess);
+        await put(BLOB_FILE, body, { access: blobAccess, ...opts });
+      }
       return res.status(200).json({ ok: true });
     } catch (e: any) {
       return res.status(500).json({ ok: false, error: e.message });

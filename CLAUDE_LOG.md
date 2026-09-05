@@ -129,3 +129,31 @@
 - SECURITY (still open): `ANTHROPIC_API_KEY` and `BLOB_READ_WRITE_TOKEN` were both
   printed to the terminal during these sessions — rotate both.
 - Old kindergarten data from the dead Upstash DB is unrecoverable; board starts empty.
+
+## 2026-09-05 21:30 — Blob access mode now self-detected (replaces BLOB_ACCESS knob)
+
+**Done**
+- Production `GET /api/data` returned `"Vercel Blob: Failed to fetch blob: 400
+  Bad Request"` — the read path on a `.private.` URL, proving the live build was
+  still on `private` and that `BLOB_ACCESS=public` had not taken effect.
+- Rewrote `pages/api/data.ts` so the code learns the store's mode instead of
+  needing config:
+  - GET: `head(BLOB_FILE, { token })` takes no access mode; its returned `url`
+    contains `.private.` or `.public.`, which sets module-level `blobAccess`.
+    `BlobNotFoundError` → return EMPTY. Then `get()` with the derived mode.
+  - POST: try `put` with the current `blobAccess`; on the API's
+    "Cannot use X access on a Y store" error, flip the mode and retry once.
+  - `BLOB_ACCESS` env var now only seeds the first guess (default private);
+    setting it in Vercel is harmless but no longer necessary.
+- Live-tested against the real (private) store, deliberately starting with the
+  WRONG mode: put(public) → mismatch → retry put(private) OK; head URL →
+  `.private.`; get read Hebrew back intact; board reset to empty. `tsc` passes.
+- Committed and pushed (user had approved pushing this fix).
+
+**Pending**
+- Production still unverified by me (Vercel API 403 for this team). After the
+  deploy finishes, test `/admin` save on the live site.
+- Still unknown whether prod and local use one store or two — no longer blocks
+  anything, but worth a look in Vercel → Storage.
+- SECURITY: rotate `ANTHROPIC_API_KEY` and `BLOB_READ_WRITE_TOKEN` (both printed
+  to terminal during debugging).
