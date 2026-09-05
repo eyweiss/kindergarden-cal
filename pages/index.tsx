@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { getHolidayForDate } from "../lib/holidays";
+import { getVacationsForDate } from "../lib/vacations";
 import styles from "../styles/Home.module.css";
 
 type Lang = "he" | "en" | "ru";
@@ -214,6 +215,7 @@ export default function Home() {
                     const isSat = i === 6;
                     const events: string[] = data?.calendar?.[key] || [];
                     const holiday = getHolidayForDate(dates[i]);
+                    const vacations = isSat ? [] : getVacationsForDate(dates[i]);
                     const dateStr = `${dates[i].getDate()}/${dates[i].getMonth()+1}`;
                     const sameDate = (d: Date) => !isSat &&
                       dates[i].getFullYear() === d.getFullYear() &&
@@ -238,6 +240,7 @@ export default function Home() {
                               // Speak calendar content in Hebrew (content is stored in Hebrew)
                               const parts: string[] = [];
                               if (holiday) parts.push(holiday);
+                              vacations.forEach(v => parts.push(v.he));
                               events.forEach(ev => parts.push(ev));
                               (data?.reminders?.[key] as string[] || []).forEach(r => parts.push(r));
                               if (parts.length > 0) {
@@ -254,7 +257,15 @@ export default function Home() {
                         </div>
                         <div className={styles.dayBody}>
                           {holiday && <div className={styles.holiday}>✡️ {holiday}</div>}
-                          {events.length === 0 && !holiday
+                          {vacations.map((v, j) => (
+                            <div
+                              key={`vac-${j}`}
+                              className={v.kind === "camp" ? styles.camp : v.kind === "note" ? styles.vacationNote : styles.vacation}
+                            >
+                              {v.kind === "camp" ? "⛺ " : v.kind === "note" ? "🕯️ " : "🏖️ "}{v[lang]}
+                            </div>
+                          ))}
+                          {events.length === 0 && !holiday && vacations.length === 0
                             ? <span className={styles.empty}>—</span>
                             : events.map((ev, j) => <div key={j} className={styles.event}>{tx(ev)}</div>)
                           }

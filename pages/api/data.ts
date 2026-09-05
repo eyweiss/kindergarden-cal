@@ -4,7 +4,7 @@ import path from "path";
 
 const DATA_FILE = path.join(process.cwd(), ".data", "gan-data.json");
 const EMPTY = { calendar: {}, notes: [], stars: [], reminders: {} };
-const REDIS_KEY = "gan-data";
+const BLOB_FILE = "gan-data.json";
 
 function readLocal() {
   try { return JSON.parse(fs.readFileSync(DATA_FILE, "utf8")); }
@@ -26,32 +26,32 @@ function migrateNotes(data: any) {
   return data;
 }
 
-function getRedisConfig() {
-  // Upstash direct integration
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
-    return { url: process.env.UPSTASH_REDIS_REST_URL, token: process.env.UPSTASH_REDIS_REST_TOKEN };
-  // Vercel KV integration (also backed by Upstash, different var names)
-  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
-    return { url: process.env.KV_REST_API_URL, token: process.env.KV_REST_API_TOKEN };
-  return null;
-}
-
+// Every Blob call passes `token` explicitly. The SDK checks options.token first
+// and only falls back to OIDC auth when it's absent — without this, the presence
+// of BLOB_STORE_ID makes it choose OIDC, which isn't enabled for `development`.
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const redisCfg = getRedisConfig();
+  const hasBlobToken = !!process.env.BLOB_READ_WRITE_TOKEN;
   const onVercel = !!process.env.VERCEL;
 
-  if (!redisCfg && onVercel) {
-    const msg = "Storage not configured: connect an Upstash Redis store in Vercel → Storage";
+  if (!hasBlobToken && onVercel) {
+    const msg = "Storage not configured: connect Vercel Blob in Vercel → Storage";
     if (req.method === "GET") return res.status(200).json({ ...EMPTY, error: msg });
     return res.status(503).json({ ok: false, error: msg });
   }
 
   if (req.method === "GET") {
-    if (!redisCfg) return res.status(200).json(migrateNotes(readLocal()));
+    if (!hasBlobToken) return res.status(200).json(migrateNotes(readLocal()));
     try {
-      const { Redis } = await import("@upstash/redis");
-      const redis = new Redis(redisCfg);
-      const data = (await redis.get<object>(REDIS_KEY)) ?? EMPTY;
+      const { get } = await import("@vercel/blob");
+      // useCache: false reads from origin storage, so the parents' board never
+      // serves a stale copy of what the teacher just saved.
+      const result = await get(BLOB_FILE, {
+        access: "private",
+        useCache: false,
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
+      if (!result || result.statusCode !== 200) return res.status(200).json(EMPTY);
+      const data = await new Response(result.stream).json();
       return res.status(200).json(migrateNotes(data));
     } catch (e: any) {
       return res.status(200).json({ ...EMPTY, error: e.message });
@@ -60,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "POST") {
     const { calendar, notes, stars, reminders } = req.body;
-    if (!redisCfg) {
+    if (!hasBlobToken) {
       try {
         writeLocal({ calendar, notes, stars, reminders });
         return res.status(200).json({ ok: true });
@@ -69,9 +69,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
     try {
-      const { Redis } = await import("@upstash/redis");
-      const redis = new Redis(redisCfg);
-      await redis.set(REDIS_KEY, { calendar, notes, stars, reminders });
+      const { put } = await import("@vercel/blob");
+      await put(BLOB_FILE, JSON.stringify({ calendar, notes, stars, reminders }), {
+        access: "private",
+        allowOverwrite: true,
+        addRandomSuffix: false,
+        contentType: "application/json",
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
       return res.status(200).json({ ok: true });
     } catch (e: any) {
       return res.status(500).json({ ok: false, error: e.message });
