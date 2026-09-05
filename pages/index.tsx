@@ -3,6 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { getHolidayForDate } from "../lib/holidays";
 import { getVacationsForDate } from "../lib/vacations";
+import { linkify } from "../lib/linkify";
 import styles from "../styles/Home.module.css";
 
 type Lang = "he" | "en" | "ru";
@@ -299,7 +300,7 @@ export default function Home() {
                     ? <p className={styles.emptyNotes}>{t.noNotes}</p>
                     : notes.map((note: any) => (
                         <div key={note.id} className={styles.noteCard}>
-                          <p className={styles.noteText}>{tx(note.text)}</p>
+                          <p className={styles.noteText}>{linkify(tx(note.text), styles.noteLink)}</p>
                           <span className={styles.noteDate}>{note.date}</span>
                         </div>
                       ))

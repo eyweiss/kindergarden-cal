@@ -406,6 +406,19 @@
   color: #2D2D2D;
 }
 
+.noteLink {
+  color: #4338CA;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  /* isolate: an LTR url inside RTL Hebrew must not be visually reordered.
+     anywhere: a long url must wrap instead of widening the card. */
+  unicode-bidi: isolate;
+  overflow-wrap: anywhere;
+}
+
+.noteLink:hover { color: #312E81; }
+
 .noteDate {
   font-size: 0.75rem;
   color: #aaa;

@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       max_tokens: 2048,
       messages: [{
         role: "user",
-        content: `Translate these Hebrew kindergarten activity texts to ${langName}. Return ONLY a JSON array of strings in the same order, no explanation.\n${JSON.stringify(texts)}`,
+        content: `Translate these Hebrew kindergarten activity texts to ${langName}. Copy URLs, email addresses and phone numbers through character-for-character — never translate, shorten or reformat them. Return ONLY a JSON array of strings in the same order, no explanation.\n${JSON.stringify(texts)}`,
       }],
     });
 

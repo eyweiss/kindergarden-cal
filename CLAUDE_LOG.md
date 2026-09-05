@@ -210,3 +210,31 @@
   The CSS reasoning and bundle inspection are solid but the phone rendering is
   unconfirmed until the user looks. If 2 columns reads as too wide/short, the
   430px block is the single place to change.
+
+## 2026-09-05 22:40 — Clickable links in parents' notes
+
+**Done**
+- New `lib/linkify.tsx`: splits note text into plain strings + `<a>` React
+  elements. Returns React NODES, never HTML, so note text cannot inject markup
+  (verified: `<script>` renders escaped). Pattern only accepts `http(s)://` or
+  `www.`, so a `javascript:` href is unmatchable.
+  - Trailing sentence punctuation is excluded from the link but kept in the text.
+  - Bare `www.x` gets an `https://` href while still displaying as typed.
+  - Links carry `target="_blank" rel="noopener noreferrer"` and `dir="ltr"`.
+- `pages/index.tsx`: notes now render `linkify(tx(note.text), styles.noteLink)`.
+- `styles/Home.module.css`: `.noteLink` — indigo, underlined,
+  `unicode-bidi: isolate` (an LTR url inside RTL Hebrew is otherwise visually
+  reordered) and `overflow-wrap: anywhere` (a long url must not widen the card).
+- `pages/api/translate.ts`: prompt now tells the model to copy URLs, emails and
+  phone numbers through character-for-character. Without this a link could be
+  mangled when a parent switches to EN/RU, since linkify runs on translated text.
+- Unit-tested 7 cases through renderToStaticMarkup (Hebrew + url, trailing dot,
+  bare www, no url, two urls, parens, script tag). `tsc` and `npm run build` pass.
+
+**Not done / caveats**
+- Only NOTES are linkified. Calendar events and reminders are still plain text —
+  trivial to extend with the same helper if the teacher puts links there.
+- Not visually verified (no browser in session); rendering confirmed only via
+  server-rendered markup.
+- The translate guard is a prompt instruction, not a guarantee — a model can
+  still deviate. Worth spot-checking a note with a link in EN/RU.
