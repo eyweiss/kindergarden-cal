@@ -5,6 +5,10 @@ import path from "path";
 const DATA_FILE = path.join(process.cwd(), ".data", "gan-data.json");
 const EMPTY = { calendar: {}, notes: [], stars: [], reminders: {} };
 const BLOB_FILE = "gan-data.json";
+// A Blob store is created as either public or private, and calls must match it
+// or the API rejects them. Set BLOB_ACCESS=public for a store created as public.
+const BLOB_ACCESS: "public" | "private" =
+  process.env.BLOB_ACCESS === "public" ? "public" : "private";
 
 function readLocal() {
   try { return JSON.parse(fs.readFileSync(DATA_FILE, "utf8")); }
@@ -46,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // useCache: false reads from origin storage, so the parents' board never
       // serves a stale copy of what the teacher just saved.
       const result = await get(BLOB_FILE, {
-        access: "private",
+        access: BLOB_ACCESS,
         useCache: false,
         token: process.env.BLOB_READ_WRITE_TOKEN,
       });
@@ -71,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const { put } = await import("@vercel/blob");
       await put(BLOB_FILE, JSON.stringify({ calendar, notes, stars, reminders }), {
-        access: "private",
+        access: BLOB_ACCESS,
         allowOverwrite: true,
         addRandomSuffix: false,
         contentType: "application/json",

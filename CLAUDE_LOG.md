@@ -92,3 +92,40 @@
 - `.gitignore` covers `.env.local` but NOT `.env.local.bak` — a backup file made
   during this session was untracked-but-committable. It was deleted. Consider
   widening the ignore pattern to `.env*`.
+
+## 2026-09-05 21:05 — Blob auth + access-mode fixes
+
+**Done**
+- Fixed "Vercel Blob: OIDC is enabled for this project, but not for the
+  development environment". Cause: `resolveBlobAuth()` in @vercel/blob checks
+  `options.token` FIRST, then falls to OIDC when an OIDC token is discoverable
+  AND `BLOB_STORE_ID` is set. The user's `.env.local` has `BLOB_STORE_ID`, so the
+  SDK chose OIDC and never read `BLOB_READ_WRITE_TOKEN`.
+  Fix: pass `token: process.env.BLOB_READ_WRITE_TOKEN` explicitly on both the
+  `get` and `put` calls. Safe in prod — if the var is absent the value is
+  `undefined`, the token branch is skipped, and the SDK falls back to OIDC.
+- Verified the whole round-trip locally against the dev server: POST returned
+  `{ok:true}`, GET returned the data, and Hebrew survived intact
+  (`'בדיקה' === 'בדיקה'`). An earlier `?????` result was the Windows shell
+  mangling the curl argument, NOT a data bug. Test data was cleared afterwards.
+- Probed the store directly: `access:"private"` succeeds, `access:"public"` fails
+  with "Cannot use public access on a private store". So the store reached by the
+  token in `.env.local` (`store_ZGRJJaQsDTDMZCjK`) is PRIVATE.
+- Production reported the MIRROR error ("Cannot use private access on a public
+  store"), which implies production reaches a DIFFERENT, public store.
+  Fix: `BLOB_ACCESS` env var, defaulting to "private"; set `BLOB_ACCESS=public`
+  in Vercel if the production store is public.
+
+**Pending / unresolved**
+- NOT verified: anything about production. The Vercel MCP tools return 403
+  Forbidden for team_TAEWh7W1RU6cp3deybrtUkxs, so runtime errors and deployment
+  lists were unavailable. The two-store conclusion is an INFERENCE from the
+  contradictory error messages, not confirmed.
+- User to check Vercel → Storage: how many Blob stores exist and which is linked.
+  If only ONE store exists, the two-store inference is wrong and this needs
+  re-diagnosing rather than papering over with BLOB_ACCESS.
+- Then either set `BLOB_ACCESS=public` in Vercel (quick), or repoint production at
+  the private store and drop the var (cleaner).
+- SECURITY (still open): `ANTHROPIC_API_KEY` and `BLOB_READ_WRITE_TOKEN` were both
+  printed to the terminal during these sessions — rotate both.
+- Old kindergarten data from the dead Upstash DB is unrecoverable; board starts empty.
