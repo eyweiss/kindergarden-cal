@@ -157,3 +157,56 @@
   anything, but worth a look in Vercel → Storage.
 - SECURITY: rotate `ANTHROPIC_API_KEY` and `BLOB_READ_WRITE_TOKEN` (both printed
   to terminal during debugging).
+
+## 2026-09-05 21:45 — PRODUCTION VERIFIED WORKING
+
+**Done**
+- Deploy of 98105a8 went live (~20:52). Polled prod `GET /api/data` until the
+  `error` field disappeared.
+- Prod READ: returns real data with no error. Prod WRITE: idempotent test —
+  read, POST identical payload back, re-read → `200 {ok:true}`, no error,
+  response byte-identical, Hebrew intact. The mismatch-retry self-heal ran in
+  prod (store is public; code defaults private, flipped, succeeded).
+- Two-store inference CONFIRMED: local token → private, empty store
+  (store_ZGRJJaQsDTDMZCjK); production → public store holding data.
+
+**Correction to earlier entries**
+- The board is NOT empty in production and the data is NOT all lost. The prod
+  Blob store already held a full week of content dated May 2026 (Shavuot week:
+  notes 9.5 / 11.5, stars גיל/סול). Origin unknown — the store predates this
+  session despite the "blob store created" message. It is STALE (May), so the
+  teacher must update it, but she is not starting from zero.
+
+**Pending (user)**
+- Test /admin save in the browser on the live site (API path is verified).
+- Rotate ANTHROPIC_API_KEY and BLOB_READ_WRITE_TOKEN (printed to terminal).
+- Optional tidy: local .env.local points at a different (private, empty) store
+  than production. Fine for dev/prod separation; align if single-store is wanted.
+- This log entry is local-only (not committed) to avoid a no-op deploy.
+
+## 2026-09-05 22:10 — Fixed mobile horizontal overflow on the parents' board
+
+**Cause**
+- Not box-sizing (globals.css already sets border-box). CSS Grid's bare `1fr`
+  means `minmax(auto, 1fr)`, and the `auto` minimum refuses to shrink a track
+  below its content's min-content width. Long Hebrew event strings therefore
+  pushed `.calendarGrid` wider than the viewport, and the excess cascaded up
+  through `.leftCol` → `.layout`. Being RTL, the overflow spilled off the LEFT
+  edge — matching the screenshot (שני / חמישי and the stars text clipped).
+
+**Done (styles/Home.module.css)**
+- `.layout`, `.calendarGrid` (7-col, 3-col, and the 860px 1-col case) all now use
+  `minmax(0, 1fr)` instead of `1fr`.
+- `min-width: 0` added to `.leftCol`, `.rightCol`, `.dayCard`, `.starItem`.
+- `overflow-wrap: anywhere` on the text classes (.event/.holiday/.vacation/.camp/
+  .vacationNote/.reminderEntry/.remindersLabel/.noteText/.starName/.empty).
+- New `@media (max-width: 430px)`: calendar drops to 2 columns and bumps several
+  font sizes back up — at 3 columns a ~390px phone gives each card only ~120px.
+- `npm run build` succeeds; verified in the emitted CSS bundle: 5×`minmax(0,1fr)`,
+  0 remaining bare `repeat(N,1fr)`, the 430px 2-col block present.
+
+**Caveat**
+- NOT visually verified — no browser/screenshot tool available in this session.
+  The CSS reasoning and bundle inspection are solid but the phone rendering is
+  unconfirmed until the user looks. If 2 columns reads as too wide/short, the
+  430px block is the single place to change.

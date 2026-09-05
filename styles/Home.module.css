@@ -59,20 +59,23 @@
 }
 
 /* ── Layout ─────────────────────────────────────────────── */
+/* minmax(0,…) and min-width:0 throughout: a bare `1fr` track will not shrink
+   below its content's min-content width, so long Hebrew strings push the grid
+   wider than the viewport and (being RTL) spill off the left edge. */
 .layout {
   display: grid;
-  grid-template-columns: 1fr 210px;
+  grid-template-columns: minmax(0, 1fr) 210px;
   gap: 1.25rem;
   align-items: start;
 }
 
-.leftCol { display: flex; flex-direction: column; gap: 1.5rem; }
-.rightCol { position: sticky; top: 1rem; }
+.leftCol { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+.rightCol { position: sticky; top: 1rem; min-width: 0; }
 
 /* ── Calendar grid ──────────────────────────────────────── */
 .calendarGrid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.5rem;
 }
 
@@ -84,6 +87,13 @@
   transition: transform 0.18s ease;
   border-top: 4px solid #ddd;
   position: relative;
+  min-width: 0;
+}
+
+/* Long unbroken words must wrap rather than widen their card. */
+.event, .holiday, .vacation, .camp, .vacationNote,
+.reminderEntry, .remindersLabel, .noteText, .starName, .empty {
+  overflow-wrap: anywhere;
 }
 
 .speakBtn {
@@ -329,12 +339,13 @@
 
 /* ── Mobile ─────────────────────────────────────────────── */
 @media (max-width: 860px) {
-  .layout { grid-template-columns: 1fr; }
+  .layout { grid-template-columns: minmax(0, 1fr); }
   .rightCol { position: static; order: -1; }
 
   /* Stars horizontal on mobile */
   .starsBox { flex-direction: row; flex-wrap: wrap; gap: 0.4rem; }
   .starsSection { padding: 0.9rem; }
+  .starItem { min-width: 0; }
 }
 
 @media (max-width: 600px) {
@@ -342,9 +353,9 @@
   .header { padding: 1.25rem 0.75rem 1.5rem; }
   .headerEmojis { font-size: 1.3rem; letter-spacing: 0.3rem; }
 
-  /* Calendar: 3 cols (Sun–Fri) + Sat hidden or small */
+  /* Calendar: 3 cols (Sun–Fri), Sat hidden */
   .calendarGrid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.4rem;
   }
   .satCard { display: none; }
@@ -357,6 +368,17 @@
 
   .sectionTitle { font-size: 1.1rem; }
   .notesBox { padding: 1rem; }
+}
+
+/* Narrow phones: 3 cards per row leaves ~120px each, too tight for the
+   event text. Two per row (3 rows for Sun–Fri) stays readable. */
+@media (max-width: 430px) {
+  .calendarGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dayName { font-size: 0.85rem; }
+  .dayDate { font-size: 0.65rem; }
+  .event { font-size: 0.75rem; }
+  .holiday, .vacation, .camp, .vacationNote { font-size: 0.7rem; }
+  .reminderEntry { font-size: 0.72rem; }
 }
 
 /* ── Notes feed (parents) ───────────────────────────────── */
